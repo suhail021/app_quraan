@@ -1,0 +1,48 @@
+name: Quran
+description: "تطبيق القرآن الكريم"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # ── دعم اللغة العربية (RTL) ──
+  flutter_localizations:
+    sdk: flutter
+
+  provider: ^6.1.1
+  google_fonts: ^6.1.0
+  cupertino_icons: ^1.0.6
+
+  # Database & Network
+  sqflite: ^2.3.0
+  path: ^1.8.3
+  http: ^1.2.0
+  dio: ^5.4.0
+  path_provider: ^2.1.2
+  shared_preferences: ^2.2.2
+
+  # Audio
+  just_audio: ^0.9.36
+  audio_service: ^0.18.12
+  cached_network_image: ^3.4.1
+  flutter_quran:
+    path: packages/flutter_quran
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+
+  assets:
+    - assets/database/quran_app.db
+    - assets/audio/bundled/
