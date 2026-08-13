@@ -47,22 +47,6 @@ class _QuranPageTopInfoWidgetState extends State<QuranPageTopInfoWidget> {
               alignment: Alignment.centerRight,
               child: FittedBox(
                 fit: BoxFit.scaleDown,
-                child: Text('سُورَةُ ${widget.surahName}',
-                    style: FlutterQuran()
-                        .hafsStyle
-                        .copyWith(
-                          color: Colors.black, 
-                          fontSize: 22,
-                        )),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
                 child: Text(
                   rightText,
                   style: FlutterQuran()
@@ -72,6 +56,22 @@ class _QuranPageTopInfoWidgetState extends State<QuranPageTopInfoWidget> {
                         fontSize: 22,
                       ),
                 ),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(widget.surahName,
+                    style: FlutterQuran()
+                        .hafsStyle
+                        .copyWith(
+                          color: Colors.black, 
+                          fontSize: 22,
+                        )),
               ),
             ),
           ),

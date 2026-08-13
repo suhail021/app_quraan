@@ -100,7 +100,11 @@ class FlutterQuranScreen extends StatelessWidget {
                                   children: [
                                     if (showBottomWidget)
                                       QuranPageTopInfoWidget(
-                                        surahName: pages[index].ayahs[0].surahNameAr,
+                                        surahName: pages[index]
+                                            .ayahs
+                                            .map((e) => e.surahNameAr)
+                                            .toSet()
+                                            .join(' - '),
                                         juz: pages[index].ayahs[0].jozz,
                                         hizb: pages[index].hizb,
                                       ),
