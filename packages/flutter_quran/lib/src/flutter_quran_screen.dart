@@ -219,8 +219,8 @@ class FlutterQuranScreen extends StatelessWidget {
                                                                         (pages[index]
                                                                                 .numberOfNewSurahs *
                                                                             (line.ayahs[0].surahNumber != 9
-                                                                                ? 55
-                                                                                : 40))) *
+                                                                                ? 110
+                                                                                : 75))) *
                                                                     0.95 /
                                                                     pages[index]
                                                                         .lines
