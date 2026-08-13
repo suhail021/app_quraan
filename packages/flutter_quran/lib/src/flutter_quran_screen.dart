@@ -146,7 +146,7 @@ class FlutterQuranScreen extends StatelessWidget {
                                                                     bookmarksAyahs,
                                                                     bookmarks,
                                                                     boxFit: BoxFit
-                                                                        .scaleDown,
+                                                                        .contain,
                                                                     onTafsirTap: onTafsirTap,
                                                                   )),
                                                             ],
@@ -235,7 +235,7 @@ class FlutterQuranScreen extends StatelessWidget {
                                                                           .last
                                                                           .centered
                                                                       ? BoxFit
-                                                                          .scaleDown
+                                                                          .contain
                                                                       : BoxFit
                                                                           .fill,
                                                                   onTafsirTap: onTafsirTap,
