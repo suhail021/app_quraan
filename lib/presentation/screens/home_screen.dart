@@ -3,7 +3,6 @@ import '../../core/theme/design_tokens.dart';
 import '../../data/models/surah_model.dart';
 import '../../data/services/database_helper.dart';
 import '../widgets/mini_player_widget.dart';
-import 'mushaf_reading_screen.dart';
 import 'book_reading_screen.dart';
 import 'reciters_screen.dart';
 import 'tafsir_download_screen.dart';

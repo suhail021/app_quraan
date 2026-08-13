@@ -1,15 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_quran/flutter_quran.dart';
-import 'package:provider/provider.dart';
 import '../../core/theme/design_tokens.dart';
 import '../../data/services/database_helper.dart';
-import '../../data/services/audio_player_service.dart';
 import '../widgets/mini_player_widget.dart';
 import 'settings_screen.dart';
 import 'reciters_screen.dart';
 import 'tafsir_download_screen.dart';
-import 'mushaf_reading_screen.dart';
 import '../widgets/ayah_tafsir_bottom_sheet.dart';
 
 class BookReadingScreen extends StatefulWidget {
@@ -94,7 +91,8 @@ class _BookReadingScreenState extends State<BookReadingScreen> {
                 
                 // 2. Fetch Tafsir
                 final ayahsInSurah = await DatabaseHelper.instance.getAyahsBySurah(ayah.surahNumber);
-                final ayahModel = ayahsInSurah.firstWhere((a) => a.numberInSurah == ayah.ayahNumber, orElse: () => ayahsInSurah.first);
+                final index = ayahsInSurah.indexWhere((a) => a.numberInSurah == ayah.ayahNumber);
+                final nextAyah = index >= 0 && index < ayahsInSurah.length - 1 ? ayahsInSurah[index + 1] : null;
                 
                 if (mounted) {
                   // 3. Show BottomSheet
