@@ -18,10 +18,10 @@ class SurahHeaderWidget extends StatelessWidget {
       ),
       alignment: Alignment.center,
       child: Text(
-        'سورة $surahName',
+        'سُورَةُ $surahName',
         style: FlutterQuran()
             .hafsStyle
-            .copyWith(fontWeight: FontWeight.w600, fontSize: 18),
+            .copyWith(fontWeight: FontWeight.w700, fontSize: 26, color: Colors.black),
       ),
     );
   }
