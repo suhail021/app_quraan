@@ -23,9 +23,11 @@ class _QuranPageBottomInfoWidgetState extends State<QuranPageBottomInfoWidget> {
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
       child: Center(
         child: Text(widget.page.toString().toArabic(),
-            style: FlutterQuran().hafsStyle.copyWith(
+            style: const TextStyle(
               color: Colors.black,
               fontSize: 22,
+              fontWeight: FontWeight.w600,
+              fontFamily: null, // Use system default which handles Arabic numerals perfectly
             )),
       ),
     );

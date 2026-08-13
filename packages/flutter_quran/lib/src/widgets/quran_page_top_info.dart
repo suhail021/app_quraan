@@ -3,10 +3,12 @@ part of '../flutter_quran_screen.dart';
 class QuranPageTopInfoWidget extends StatefulWidget {
   const QuranPageTopInfoWidget(
       {required this.surahName,
+      required this.juz,
       required this.hizb,
       super.key});
 
   final String surahName;
+  final int juz;
   final int? hizb;
 
   @override
@@ -14,18 +16,20 @@ class QuranPageTopInfoWidget extends StatefulWidget {
 }
 
 class _QuranPageTopInfoWidgetState extends State<QuranPageTopInfoWidget> {
-  String hizbText = '';
+  String rightText = '';
 
   @override
   void didChangeDependencies() {
+    final juzString = 'الجزء ${QuranConstants.quranHizbs[widget.juz - 1]}';
     if (widget.hizb != null) {
       final hizbIndex = (widget.hizb! / 4).floor();
-      final juzIndex = (hizbIndex / 2).floor();
       final hizbPart = mapNumberToHizbPart(widget.hizb!);
       final hizbString = hizbPart.isNotEmpty ? '$hizbPart الحزب' : 'الحزب';
       
-      hizbText =
-          'الجزء ${QuranConstants.quranHizbs[juzIndex]} | $hizbString ${QuranConstants.quranHizbs[hizbIndex]}';
+      rightText =
+          '$juzString | $hizbString ${QuranConstants.quranHizbs[hizbIndex]}';
+    } else {
+      rightText = juzString;
     }
     super.didChangeDependencies();
   }
@@ -57,20 +61,18 @@ class _QuranPageTopInfoWidgetState extends State<QuranPageTopInfoWidget> {
             flex: 1,
             child: Align(
               alignment: Alignment.centerLeft,
-              child: widget.hizb != null
-                  ? FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        hizbText,
-                        style: FlutterQuran()
-                            .hafsStyle
-                            .copyWith(
-                              color: Colors.black, 
-                              fontSize: 22,
-                            ),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  rightText,
+                  style: FlutterQuran()
+                      .hafsStyle
+                      .copyWith(
+                        color: Colors.black, 
+                        fontSize: 22,
                       ),
-                    )
-                  : const SizedBox(),
+                ),
+              ),
             ),
           ),
         ],

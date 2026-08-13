@@ -101,6 +101,7 @@ class FlutterQuranScreen extends StatelessWidget {
                                     if (showBottomWidget)
                                       QuranPageTopInfoWidget(
                                         surahName: pages[index].ayahs[0].surahNameAr,
+                                        juz: pages[index].ayahs[0].jozz,
                                         hizb: pages[index].hizb,
                                       ),
                                     Expanded(
@@ -221,7 +222,7 @@ class FlutterQuranScreen extends StatelessWidget {
                                                                             (line.ayahs[0].surahNumber != 9
                                                                                 ? 110
                                                                                 : 75))) *
-                                                                    0.95 /
+                                                                    0.99 /
                                                                     pages[index]
                                                                         .lines
                                                                         .length,
