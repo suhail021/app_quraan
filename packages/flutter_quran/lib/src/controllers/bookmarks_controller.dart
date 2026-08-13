@@ -10,13 +10,12 @@ class BookmarksCubit extends Cubit<List<Bookmark>> {
 
   final QuranRepository _quranRepository;
   final Bookmark searchBookmark =
-      Bookmark(id: 3, colorCode: 0xFFF7EFE0, name: 'search Bookmark');
+      Bookmark(id: 3, colorCode: 0x66D4AF37, name: 'تحديد مؤقت');
 
   final List<Bookmark> _defaultBookmarks = [
-    Bookmark(id: 0, colorCode: 0xAAFFD354, name: 'العلامة الصفراء'),
-    Bookmark(id: 1, colorCode: 0xAAF36077, name: 'العلامة الحمراء'),
-    Bookmark(id: 2, colorCode: 0xAA00CD00, name: 'العلامة الخضراء'),
+    Bookmark(id: 0, colorCode: 0xFFD4AF37, name: 'علامة الحفظ'),
   ];
+
   List<Bookmark> bookmarks = [];
 
   void initBookmarks({List<Bookmark>? userBookmarks, bool overwrite = false}) {

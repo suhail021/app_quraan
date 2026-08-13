@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quran/flutter_quran.dart';
 import 'package:flutter_quran/src/utils/string_extensions.dart';
+import 'dart:math' as math;
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'app_bloc.dart';
@@ -15,6 +16,7 @@ part 'utils/toast_utils.dart';
 part 'widgets/bsmallah_widget.dart';
 part 'widgets/quran_line.dart';
 part 'widgets/quran_page_bottom_info.dart';
+part 'widgets/quran_page_top_info.dart';
 part 'widgets/surah_header_widget.dart';
 part 'widgets/default_drawer.dart';
 part 'widgets/ayah_long_click_dialog.dart';
@@ -93,10 +95,14 @@ class FlutterQuranScreen extends StatelessWidget {
                           itemBuilder: (ctx, index) {
                             List<String> newSurahs = [];
                             return Container(
-                                height: deviceSize.height * 0.8,
-                                padding: const EdgeInsets.all(16.0),
+                                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                                 child: Column(
                                   children: [
+                                    if (showBottomWidget)
+                                      QuranPageTopInfoWidget(
+                                        surahName: pages[index].ayahs[0].surahNameAr,
+                                        hizb: pages[index].hizb,
+                                      ),
                                     Expanded(
                                       child: index == 0 || index == 1
 
@@ -130,9 +136,9 @@ class FlutterQuranScreen extends StatelessWidget {
                                                           return Column(
                                                             children: [
                                                               SizedBox(
-                                                                  width: deviceSize
+                                                                  width: math.max(0.0, deviceSize
                                                                           .width -
-                                                                      32,
+                                                                      32.0),
                                                                   child:
                                                                       QuranLine(
                                                                     line,
@@ -156,6 +162,7 @@ class FlutterQuranScreen extends StatelessWidget {
                                           : LayoutBuilder(
                                               builder: (context, constraints) {
                                               return ListView(
+                                                  padding: EdgeInsets.zero,
                                                   physics: currentOrientation ==
                                                           Orientation.portrait
                                                       ? const NeverScrollableScrollPhysics()
@@ -199,9 +206,9 @@ class FlutterQuranScreen extends StatelessWidget {
                                                                       9))
                                                                 BasmallahWidget(line.ayahs[0].surahNumber),
                                                               SizedBox(
-                                                                width: deviceSize
+                                                                width: math.max(0.0, deviceSize
                                                                         .width -
-                                                                    30,
+                                                                    30.0),
                                                                 height: ((currentOrientation ==
                                                                                 Orientation
                                                                                     .portrait

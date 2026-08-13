@@ -85,6 +85,14 @@ class FlutterQuran {
   /// Note it receives surah number not surah index
   Surah getSurah(int surah) => AppBloc.quranCubit.surahs[surah - 1];
 
+  /// [getAyahByNumber] retrieves an Ayah by its Surah number and Ayah number
+  Ayah? getAyahByNumber(int surahNumber, int ayahNumber) {
+    if (surahNumber < 1 || surahNumber > 114) return null;
+    final surah = getSurah(surahNumber);
+    if (ayahNumber < 1 || ayahNumber > surah.ayahs.length) return null;
+    return surah.ayahs[ayahNumber - 1];
+  }
+
   ///[getAllSurahs] returns list of all Quran surahs' names
   List<String> getAllSurahs({bool isArabic = true}) => AppBloc.quranCubit.surahs
       .map((surah) => "سورة ${isArabic ? surah.nameAr : surah.nameEn}")
