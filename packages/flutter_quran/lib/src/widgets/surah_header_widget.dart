@@ -8,10 +8,10 @@ class SurahHeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 50,
+      height: 70,
       width: double.infinity,
       margin: const EdgeInsets.symmetric(vertical: 8.0),
-      padding: const EdgeInsets.symmetric(vertical: 0.0),
+      padding: const EdgeInsets.only(bottom: 8.0), // Push text up slightly to center it in the frame
       decoration: BoxDecoration(
         image: DecorationImage(
             image: AssetImage(Images().surahHeader), fit: BoxFit.fill),

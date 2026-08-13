@@ -9,9 +9,9 @@ class BasmallahWidget extends StatelessWidget {
     return Center(
       child: Text(
         surahNumber == 97 || surahNumber == 95
-            ? "بِّسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ"
-            : 'بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ',
-        style: FlutterQuran().hafsStyle,
+            ? "بِّسۡـــــــمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيـــــــمِ"
+            : 'بِسۡـــــــمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيـــــــمِ',
+        style: FlutterQuran().hafsStyle.copyWith(fontSize: 26),
       ),
     );
   }
