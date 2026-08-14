@@ -58,57 +58,110 @@ class _RecitersScreenState extends State<RecitersScreen> {
                   itemBuilder: (context, index) {
                     final reciter = _reciters[index];
                     return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: ExpansionTile(
-                        leading: CircleAvatar(
-                          backgroundColor: primaryAccent.withOpacity(0.1),
-                          child: Icon(Icons.mic, color: primaryAccent),
+                      elevation: 0,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: BorderSide(
+                          color: isDark ? DesignTokens.darkBorder : DesignTokens.lightBorder,
                         ),
-                        title: Text(
-                          reciter.name,
-                          style: TextStyle(
-                            fontFamily: DesignTokens.fontCairo,
-                            fontWeight: FontWeight.bold,
-                            color: textPrimary,
-                          ),
-                        ),
-                        subtitle: Text(
-                          '${reciter.totalAudioFiles} سورة متوفرة (${reciter.bundledAudioFilesCount} مدمجة أوفلاين)',
-                          style: TextStyle(
-                            fontFamily: DesignTokens.fontCairo,
-                            fontSize: 12,
-                            color: textPrimary.withOpacity(0.6),
-                          ),
-                        ),
-                        children: reciter.audioFiles.map((file) {
-                          return ListTile(
-                            dense: true,
-                            title: Text(
-                              'سورة ${file.surahNameAr}',
-                              style: TextStyle(fontFamily: DesignTokens.fontCairo, color: textPrimary),
+                      ),
+                      color: isDark ? DesignTokens.darkCard : DesignTokens.lightCard,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: ExpansionTile(
+                          backgroundColor: primaryAccent.withOpacity(0.02),
+                          collapsedBackgroundColor: Colors.transparent,
+                          leading: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: primaryAccent.withOpacity(0.1),
+                              shape: BoxShape.circle,
                             ),
-                            subtitle: Text(
-                              file.isBundled ? 'مدمجة بالتطبيق أوفلاين' : 'تحميل عند الطلب',
+                            child: Icon(Icons.person_pin, color: primaryAccent, size: 24),
+                          ),
+                          title: Text(
+                            reciter.name,
+                            style: TextStyle(
+                              fontFamily: DesignTokens.fontCairo,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: textPrimary,
+                            ),
+                          ),
+                          subtitle: Padding(
+                            padding: const EdgeInsets.only(top: 4.0),
+                            child: Text(
+                              '${reciter.totalAudioFiles} سورة (${reciter.bundledAudioFilesCount} مدمجة)',
                               style: TextStyle(
                                 fontFamily: DesignTokens.fontCairo,
-                                fontSize: 11,
-                                color: file.isBundled ? const Color(0xFF10B981) : goldAccent,
+                                fontSize: 12,
+                                color: textPrimary.withOpacity(0.6),
                               ),
                             ),
-                            trailing: IconButton(
-                              icon: Icon(Icons.play_arrow_rounded, color: primaryAccent),
-                              onPressed: () {
-                                final player = Provider.of<AudioPlayerService>(context, listen: false);
-                                player.playSurah(
-                                  surahNumber: file.surahNumber,
-                                  surahName: file.surahNameAr,
-                                  reciterName: reciter.name,
-                                  streamUrl: file.downloadUrl,
-                                );
-                              },
+                          ),
+                          children: [
+                            Container(
+                              color: (isDark ? Colors.black : Colors.white).withOpacity(0.5),
+                              height: 1,
                             ),
-                          );
-                        }).toList(),
+                            ...reciter.audioFiles.map((file) {
+                              return Consumer<AudioPlayerService>(
+                                builder: (context, player, child) {
+                                  final isDownloaded = player.isDownloaded(reciter.name, file.surahNumber);
+                                  final isDownloading = player.isDownloading(reciter.name, file.surahNumber);
+
+                                  return ListTile(
+                                    dense: true,
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 2),
+                                    leading: Text(
+                                      file.surahNumber.toString().padLeft(3, '0'),
+                                      style: TextStyle(
+                                        fontFamily: DesignTokens.fontCairo,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: textPrimary.withOpacity(0.4),
+                                      ),
+                                    ),
+                                    title: Text(
+                                      'سورة ${file.surahNameAr}',
+                                      style: TextStyle(
+                                        fontFamily: DesignTokens.fontCairo,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                        color: textPrimary,
+                                      ),
+                                    ),
+                                    trailing: isDownloading
+                                        ? SizedBox(
+                                            width: 28,
+                                            height: 28,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2.5,
+                                              valueColor: AlwaysStoppedAnimation<Color>(primaryAccent),
+                                            ),
+                                          )
+                                        : IconButton(
+                                            icon: Icon(
+                                              isDownloaded ? Icons.play_circle_fill_rounded : Icons.cloud_download_rounded,
+                                              color: isDownloaded ? primaryAccent : goldAccent,
+                                              size: 28,
+                                            ),
+                                            onPressed: () {
+                                              player.downloadAndPlaySurah(
+                                                surahNumber: file.surahNumber,
+                                                surahName: file.surahNameAr,
+                                                reciterName: reciter.name,
+                                                streamUrl: file.downloadUrl,
+                                              );
+                                            },
+                                          ),
+                                  );
+                                },
+                              );
+                            }).toList(),
+                          ],
+                        ),
                       ),
                     );
                   },

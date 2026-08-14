@@ -7,7 +7,7 @@ class ApiConfig {
   /// 2. تطبيق ويندوز أو متصفح أو محاكي iOS: 'http://127.0.0.1:8000/api'
   /// 3. سيرفر استضافة حقيقي مستقبلاً: 'https://your-domain.com/api'
   /// -------------------------------------------------------------------
-  static const String baseUrl = 'http://10.0.2.2:8000/api';
+  static const String baseUrl = 'https://lightseagreen-chinchilla-517199.hostingersite.com/api';
 
   /// رابط التخزين العام للملفات الصوتية والتفاسير
   static String get storageUrl {

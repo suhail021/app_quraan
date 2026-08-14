@@ -5,6 +5,8 @@ import 'package:just_audio/just_audio.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import 'package:dio/dio.dart';
+
 /// السور المُدمجة مباشرة داخل التطبيق (لا تحتاج إنترنت أبداً)
 /// الفاتحة (001) + البقرة (002) + جزء عمّ (078 - 114) = 39 سورة
 const Set<int> kBundledSurahs = {
@@ -18,6 +20,7 @@ enum AudioSourceType { bundled, localFile, streaming }
 
 class AudioPlayerService extends ChangeNotifier {
   final AudioPlayer _player = AudioPlayer();
+  final Dio _dio = Dio();
 
   bool _isPlaying = false;
   String _currentSurahName = '';
@@ -25,6 +28,10 @@ class AudioPlayerService extends ChangeNotifier {
   Duration _position = Duration.zero;
   Duration _duration = Duration.zero;
   AudioSourceType _sourceType = AudioSourceType.streaming;
+  
+  // Download tracking
+  final Set<String> _downloadingKeys = {};
+  final Set<String> _downloadedKeys = {};
 
   bool get isPlaying => _isPlaying;
   String get currentSurahName => _currentSurahName;
@@ -61,6 +68,106 @@ class AudioPlayerService extends ChangeNotifier {
       _duration = dur ?? Duration.zero;
       notifyListeners();
     });
+    _initDownloadedFiles();
+  }
+
+  Future<void> _initDownloadedFiles() async {
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final downloadsDir = Directory(p.join(dir.path, 'downloads'));
+      if (await downloadsDir.exists()) {
+        final entities = downloadsDir.listSync(recursive: true);
+        for (var entity in entities) {
+          if (entity is File && entity.path.endsWith('.mp3')) {
+            // path format: downloads/SafeReciterName/001.mp3
+            final parts = p.split(entity.path);
+            if (parts.length >= 2) {
+              final surahNumStr = p.basenameWithoutExtension(entity.path);
+              final safeReciter = parts[parts.length - 2];
+              final surahNum = int.tryParse(surahNumStr);
+              if (surahNum != null) {
+                _downloadedKeys.add('${safeReciter}_$surahNum');
+              }
+            }
+          }
+        }
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('Error loading downloaded files: $e');
+    }
+  }
+
+  String _getDownloadKey(String reciterName, int surahNumber) {
+    final safeReciterName = reciterName.replaceAll(RegExp(r'[^a-zA-Z0-9\u0600-\u06FF]'), '_');
+    return '${safeReciterName}_$surahNumber';
+  }
+
+  bool isDownloading(String reciterName, int surahNumber) {
+    return _downloadingKeys.contains(_getDownloadKey(reciterName, surahNumber));
+  }
+
+  bool isDownloaded(String reciterName, int surahNumber) {
+    if (kBundledSurahs.contains(surahNumber)) return true;
+    return _downloadedKeys.contains(_getDownloadKey(reciterName, surahNumber));
+  }
+
+  Future<String> _getSurahLocalPath(String reciterName, int surahNumber) async {
+    final dir = await getApplicationDocumentsDirectory();
+    final paddedNum = surahNumber.toString().padLeft(3, '0');
+    final safeReciterName = reciterName.replaceAll(RegExp(r'[^a-zA-Z0-9\u0600-\u06FF]'), '_');
+    return p.join(dir.path, 'downloads', safeReciterName, '$paddedNum.mp3');
+  }
+
+  Future<void> downloadAndPlaySurah({
+    required int surahNumber,
+    required String surahName,
+    required String reciterName,
+    required String streamUrl,
+  }) async {
+    if (isDownloaded(reciterName, surahNumber)) {
+      // Already downloaded or bundled, play directly
+      final localPath = await _getSurahLocalPath(reciterName, surahNumber);
+      await playSurah(
+        surahNumber: surahNumber,
+        surahName: surahName,
+        reciterName: reciterName,
+        localFilePath: kBundledSurahs.contains(surahNumber) ? null : localPath,
+      );
+      return;
+    }
+
+    final key = _getDownloadKey(reciterName, surahNumber);
+    if (_downloadingKeys.contains(key)) return; // Already downloading
+
+    _downloadingKeys.add(key);
+    notifyListeners();
+
+    try {
+      final localPath = await _getSurahLocalPath(reciterName, surahNumber);
+      final file = File(localPath);
+      if (!(await file.parent.exists())) {
+        await file.parent.create(recursive: true);
+      }
+
+      await _dio.download(streamUrl, localPath);
+      
+      _downloadedKeys.add(key);
+      _downloadingKeys.remove(key);
+      notifyListeners();
+
+      // Autoplay after download
+      await playSurah(
+        surahNumber: surahNumber,
+        surahName: surahName,
+        reciterName: reciterName,
+        localFilePath: localPath,
+      );
+    } catch (e) {
+      debugPrint('Download failed: $e');
+      _downloadingKeys.remove(key);
+      notifyListeners();
+    }
   }
 
   /// تشغيل سورة — يختار المصدر تلقائياً بالأولوية:

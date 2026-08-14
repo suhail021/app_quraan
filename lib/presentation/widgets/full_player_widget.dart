@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/design_tokens.dart';
 import '../../data/services/audio_player_service.dart';
+import '../screens/reciters_screen.dart';
+import 'reciter_surahs_bottom_sheet.dart';
 
 class FullPlayerWidget extends StatelessWidget {
   const FullPlayerWidget({Key? key}) : super(key: key);
@@ -42,22 +44,70 @@ class FullPlayerWidget extends StatelessWidget {
           const SizedBox(height: 24),
 
           // اسم السورة والقارئ
-          Text(
-            playerService.currentSurahName,
-            style: TextStyle(
-              fontFamily: DesignTokens.fontCairo,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: textPrimary,
+          GestureDetector(
+            onTap: () {
+              Navigator.pop(context); // Close the full player sheet
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) => ReciterSurahsBottomSheet(reciterName: playerService.currentReciterName),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: primaryAccent.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    playerService.currentSurahName,
+                    style: TextStyle(
+                      fontFamily: DesignTokens.fontCairo,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: textPrimary,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(Icons.format_list_bulleted_rounded, color: primaryAccent, size: 20),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            playerService.currentReciterName,
-            style: TextStyle(
-              fontFamily: DesignTokens.fontCairo,
-              fontSize: 14,
-              color: textPrimary.withOpacity(0.6),
+          GestureDetector(
+            onTap: () {
+              // Close the bottom sheet first, then open RecitersScreen
+              Navigator.pop(context);
+              import_reciters_screen(context);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: primaryAccent.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.person_outline, size: 16, color: primaryAccent),
+                  const SizedBox(width: 6),
+                  Text(
+                    playerService.currentReciterName.isEmpty ? 'اختر القارئ' : playerService.currentReciterName,
+                    style: TextStyle(
+                      fontFamily: DesignTokens.fontCairo,
+                      fontSize: 14,
+                      color: primaryAccent,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(Icons.keyboard_arrow_down, size: 18, color: primaryAccent),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 12),
@@ -187,5 +237,9 @@ class FullPlayerWidget extends StatelessWidget {
         ],
       ),
     );
+  }
+  
+  void import_reciters_screen(BuildContext context) {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => const RecitersScreen()));
   }
 }

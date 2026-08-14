@@ -7,6 +7,7 @@ import '../widgets/mini_player_widget.dart';
 import 'settings_screen.dart';
 import 'reciters_screen.dart';
 import 'tafsir_download_screen.dart';
+import 'tafsir_surahs_screen.dart';
 import '../widgets/ayah_tafsir_bottom_sheet.dart';
 
 class BookReadingScreen extends StatefulWidget {
@@ -195,6 +196,13 @@ class _BookReadingScreenState extends State<BookReadingScreen> {
                 },
               ),
               IconButton(
+                icon: Icon(Icons.menu_book, color: textPrimary),
+                tooltip: 'التفسير',
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const TafsirSurahsScreen()));
+                },
+              ),
+              IconButton(
                 icon: Icon(Icons.settings, color: textPrimary),
                 tooltip: 'الإعدادات',
                 onPressed: () {
@@ -246,61 +254,7 @@ class _BookReadingScreenState extends State<BookReadingScreen> {
         children: [
           // Audio Player embedded in the bottom bar (Shows Reciter and Surah)
           const MiniPlayerWidget(),
-          
-          const SizedBox(height: 8),
-          
-          // Audio & Downloads controls
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildNavButton(
-                icon: Icons.record_voice_over,
-                label: 'تغيير القارئ',
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const RecitersScreen()));
-                },
-                color: textPrimary,
-              ),
-              _buildNavButton(
-                icon: Icons.download,
-                label: 'تحميل التفاسير',
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const TafsirDownloadScreen()));
-                },
-                color: textPrimary,
-              ),
-            ],
-          ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildNavButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-    required Color color,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Column(
-          children: [
-            Icon(icon, color: DesignTokens.lightPrimaryAccent, size: 24),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontFamily: DesignTokens.fontCairo,
-                color: color,
-                fontSize: 12,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

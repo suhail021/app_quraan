@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/design_tokens.dart';
 import '../../data/services/audio_player_service.dart';
+import '../screens/reciters_screen.dart';
 import 'full_player_widget.dart';
+import 'reciter_surahs_bottom_sheet.dart';
 
 class MiniPlayerWidget extends StatelessWidget {
   const MiniPlayerWidget({Key? key}) : super(key: key);
@@ -11,26 +13,30 @@ class MiniPlayerWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final playerService = Provider.of<AudioPlayerService>(context);
 
-    if (playerService.currentSurahName.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark ? DesignTokens.darkCard : DesignTokens.lightCard;
     final primaryAccent = isDark ? DesignTokens.darkPrimaryAccent : DesignTokens.lightPrimaryAccent;
     final textPrimary = isDark ? DesignTokens.darkTextPrimary : DesignTokens.lightTextPrimary;
 
+    final bool isPlayingAny = playerService.currentSurahName.isNotEmpty;
+    final String displaySurah = isPlayingAny ? playerService.currentSurahName : 'سورة الفاتحة';
+    final String displayReciter = isPlayingAny ? playerService.currentReciterName : 'القارئ الإفتراضي (جاهز للتشغيل)';
+
     return GestureDetector(
       onTap: () {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          builder: (context) => const FullPlayerWidget(),
-        );
+        if (!isPlayingAny) {
+          import_reciters_screen(context);
+        } else {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (context) => const FullPlayerWidget(),
+          );
+        }
       },
       child: Container(
-        height: 68,
+        height: 85,
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: cardBg.withOpacity(0.95),
@@ -48,14 +54,13 @@ class MiniPlayerWidget extends StatelessWidget {
         ),
         child: Column(
           children: [
-            // شريط التقدم الرفيع بالأعلى
             LinearProgressIndicator(
               value: playerService.duration.inMilliseconds > 0
                   ? playerService.position.inMilliseconds / playerService.duration.inMilliseconds
                   : 0.0,
               backgroundColor: Colors.transparent,
               valueColor: AlwaysStoppedAnimation<Color>(primaryAccent),
-              minHeight: 2.5,
+              minHeight: 4.0,
             ),
             Expanded(
               child: Padding(
@@ -63,46 +68,101 @@ class MiniPlayerWidget extends StatelessWidget {
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: primaryAccent.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(Icons.music_note, color: primaryAccent, size: 20),
+                      child: Icon(Icons.library_music_rounded, color: primaryAccent, size: 24),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            playerService.currentSurahName,
-                            style: TextStyle(
-                              fontFamily: DesignTokens.fontCairo,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                              color: textPrimary,
-                            ),
+                      child: GestureDetector(
+                        onTap: () {
+                          if (isPlayingAny) {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (context) => ReciterSurahsBottomSheet(reciterName: playerService.currentReciterName),
+                            );
+                          }
+                        },
+                        child: Container(
+                          color: Colors.transparent,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    displaySurah,
+                                    style: TextStyle(
+                                      fontFamily: DesignTokens.fontCairo,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                      color: textPrimary,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Icon(Icons.keyboard_arrow_down, size: 16, color: primaryAccent),
+                                ],
+                              ),
+                              Text(
+                                displayReciter,
+                                style: TextStyle(
+                                  fontFamily: DesignTokens.fontCairo,
+                                  fontSize: 12,
+                                  color: textPrimary.withOpacity(0.6),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
-                          Text(
-                            playerService.currentReciterName,
-                            style: TextStyle(
-                              fontFamily: DesignTokens.fontCairo,
-                              fontSize: 11,
-                              color: textPrimary.withOpacity(0.6),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
-                    IconButton(
-                      icon: Icon(
-                        playerService.isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill,
-                        size: 36,
-                        color: primaryAccent,
-                      ),
-                      onPressed: () => playerService.togglePlayPause(),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.skip_previous_rounded, size: 28),
+                          color: primaryAccent,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          onPressed: () {},
+                        ),
+                        const SizedBox(width: 12),
+                        IconButton(
+                          icon: Icon(
+                            isPlayingAny && playerService.isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill,
+                            size: 44,
+                            color: primaryAccent,
+                          ),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          onPressed: () {
+                            if (!isPlayingAny) {
+                              playerService.playSurah(
+                                surahNumber: 1,
+                                surahName: 'الفاتحة',
+                                reciterName: 'أحمد الغباني',
+                              );
+                            } else {
+                              playerService.togglePlayPause();
+                            }
+                          },
+                        ),
+                        const SizedBox(width: 12),
+                        IconButton(
+                          icon: const Icon(Icons.skip_next_rounded, size: 28),
+                          color: primaryAccent,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          onPressed: () {},
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -112,5 +172,9 @@ class MiniPlayerWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+  
+  void import_reciters_screen(BuildContext context) {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => const RecitersScreen()));
   }
 }

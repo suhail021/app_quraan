@@ -141,16 +141,13 @@ class FlutterQuranScreen extends StatelessWidget {
                                                           return Column(
                                                             children: [
                                                               SizedBox(
-                                                                  width: math.max(0.0, deviceSize
-                                                                          .width -
-                                                                      32.0),
-                                                                  child:
-                                                                      QuranLine(
+                                                                  width: math.max(0.0, deviceSize.width - 32.0),
+                                                                  height: deviceSize.height * 0.06, // Matches average line height of normal pages
+                                                                  child: QuranLine(
                                                                     line,
                                                                     bookmarksAyahs,
                                                                     bookmarks,
-                                                                    boxFit: BoxFit
-                                                                        .contain,
+                                                                    boxFit: BoxFit.contain,
                                                                     onTafsirTap: onTafsirTap,
                                                                   )),
                                                             ],
