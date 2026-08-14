@@ -50,17 +50,38 @@ class MiniPlayerWidget extends StatelessWidget {
         ),
         child: Column(
           children: [
-            LinearProgressIndicator(
-              value: playerService.duration.inMilliseconds > 0
-                  ? playerService.position.inMilliseconds / playerService.duration.inMilliseconds
-                  : 0.0,
-              backgroundColor: Colors.transparent,
-              valueColor: AlwaysStoppedAnimation<Color>(primaryAccent),
-              minHeight: 4.0,
+            SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                trackHeight: 4.0,
+                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6.0),
+                overlayShape: const RoundSliderOverlayShape(overlayRadius: 14.0),
+                activeTrackColor: primaryAccent,
+                inactiveTrackColor: primaryAccent.withOpacity(0.2),
+                thumbColor: primaryAccent,
+                overlayColor: primaryAccent.withOpacity(0.2),
+                // Remove horizontal padding
+                trackShape: const RectangularSliderTrackShape(),
+              ),
+              child: SizedBox(
+                height: 12,
+                child: Slider(
+                  value: playerService.duration.inMilliseconds > 0
+                      ? playerService.position.inMilliseconds.toDouble()
+                      : 0.0,
+                  max: playerService.duration.inMilliseconds > 0
+                      ? playerService.duration.inMilliseconds.toDouble()
+                      : 1.0,
+                  onChanged: (value) {
+                    if (playerService.duration.inMilliseconds > 0) {
+                      playerService.seek(Duration(milliseconds: value.toInt()));
+                    }
+                  },
+                ),
+              ),
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.only(left: 5, right: 16),
                 child: Row(
                   children: [
                     Container(
@@ -92,13 +113,17 @@ class MiniPlayerWidget extends StatelessWidget {
                             children: [
                               Row(
                                 children: [
-                                  Text(
-                                    displaySurah,
-                                    style: TextStyle(
-                                      fontFamily: DesignTokens.fontCairo,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15,
-                                      color: textPrimary,
+                                  Flexible(
+                                    child: Text(
+                                      displaySurah,
+                                      style: TextStyle(
+                                        fontFamily: DesignTokens.fontCairo,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
+                                        color: textPrimary,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                   const SizedBox(width: 4),
@@ -138,13 +163,24 @@ class MiniPlayerWidget extends StatelessWidget {
                           ),
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
-                          onPressed: () {
+                          onPressed: () async {
                             if (!isPlayingAny) {
-                              playerService.playSurah(
-                                surahNumber: 1,
-                                surahName: 'الفاتحة',
-                                reciterName: 'أحمد بن عبدالله الغباني',
-                              );
+                              try {
+                                await playerService.playSurah(
+                                  surahNumber: 1,
+                                  surahName: 'الفاتحة',
+                                  reciterName: 'أحمد بن عبدالله الغباني',
+                                );
+                              } on OfflineAudioException catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(e.message, style: const TextStyle(fontFamily: DesignTokens.fontCairo)),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              }
                             } else {
                               playerService.togglePlayPause();
                             }

@@ -3,19 +3,79 @@ import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:dio/dio.dart';
+import 'package:archive/archive_io.dart';
+import 'package:path_provider/path_provider.dart';
 import '../models/surah_model.dart';
 import '../models/ayah_model.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
   static Database? _database;
+  String _currentDbName = 'quran_app.db';
 
   DatabaseHelper._init();
 
   Future<Database?> get database async {
     if (_database != null) return _database;
-    _database = await _initDB('quran_app.db');
+    _database = await _initDB(_currentDbName);
     return _database;
+  }
+
+  /// 📌 تغيير قاعدة البيانات النشطة (مفيد عند تغيير التفسير)
+  Future<void> changeDatabase(String dbName) async {
+    if (dbName == 'tafsir_muyassar.db') dbName = 'quran_app.db';
+    if (_currentDbName == dbName && _database != null) return;
+    if (_database != null) {
+      await _database!.close();
+      _database = null;
+    }
+    _currentDbName = dbName;
+    await database; // إعادة التهيئة
+  }
+
+  /// 📌 التحقق مما إذا كان التفسير محملاً محلياً
+  Future<bool> isTafsirDownloaded(String key) async {
+    if (key == 'muyassar') return true; // الميسر مدمج كافتراضي
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, 'tafsir_$key.db');
+    return await databaseExists(path);
+  }
+
+  /// 📌 تحميل وفك ضغط قاعدة بيانات التفسير
+  Future<bool> downloadAndExtractTafsir(String key, String zipUrl) async {
+    try {
+      final dbPath = await getDatabasesPath();
+      final targetDbPath = join(dbPath, 'tafsir_$key.db');
+      
+      // تحميل الملف المضغوط إلى مجلد مؤقت
+      final tempDir = await getTemporaryDirectory();
+      final zipPath = join(tempDir.path, 'tafsir_$key.zip');
+      
+      final dio = Dio();
+      await dio.download(zipUrl, zipPath);
+      
+      // فك الضغط
+      final bytes = File(zipPath).readAsBytesSync();
+      final archive = ZipDecoder().decodeBytes(bytes);
+      
+      for (final file in archive) {
+        if (file.isFile && file.name.endsWith('.db')) {
+          final data = file.content as List<int>;
+          File(targetDbPath)
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(data);
+          break; // نفترض أن هناك ملف DB واحد
+        }
+      }
+      
+      // تنظيف الملف المؤقت
+      File(zipPath).deleteSync();
+      return true;
+    } catch (e) {
+      print('Error downloading tafsir: $e');
+      return false; // فشل (بسبب الإنترنت أو غيره)
+    }
   }
 
   Future<Database?> _initDB(String filePath) async {

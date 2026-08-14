@@ -18,6 +18,13 @@ const Set<int> kBundledSurahs = {
 
 enum AudioSourceType { bundled, localFile, streaming }
 
+class OfflineAudioException implements Exception {
+  final String message;
+  OfflineAudioException([this.message = 'تعذر التحميل تأكد من الاتصال بالانترنت']);
+  @override
+  String toString() => message;
+}
+
 class AudioPlayerService extends ChangeNotifier {
   final AudioPlayer _player = AudioPlayer();
   final Dio _dio = Dio();
@@ -167,6 +174,7 @@ class AudioPlayerService extends ChangeNotifier {
       debugPrint('Download failed: $e');
       _downloadingKeys.remove(key);
       notifyListeners();
+      throw OfflineAudioException();
     }
   }
 
@@ -221,6 +229,7 @@ class AudioPlayerService extends ChangeNotifier {
       debugPrint('لا يوجد مصدر صوتي متاح لسورة $surahName');
     } catch (e) {
       debugPrint('خطأ بتشغيل سورة $surahName: $e');
+      throw OfflineAudioException();
     }
   }
 

@@ -53,7 +53,7 @@ class _QuranPageTopInfoWidgetState extends State<QuranPageTopInfoWidget> {
                       .hafsStyle
                       .copyWith(
                         color: Colors.black, 
-                        fontSize: 22,
+                        fontSize: 16,
                       ),
                 ),
               ),
@@ -70,7 +70,7 @@ class _QuranPageTopInfoWidgetState extends State<QuranPageTopInfoWidget> {
                         .hafsStyle
                         .copyWith(
                           color: Colors.black, 
-                          fontSize: 22,
+                          fontSize: 16,
                         )),
               ),
             ),

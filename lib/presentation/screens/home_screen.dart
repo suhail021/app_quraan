@@ -58,13 +58,132 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildSurahList() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textPrimary = isDark ? DesignTokens.darkTextPrimary : DesignTokens.lightTextPrimary;
+    final primaryAccent = isDark ? DesignTokens.darkPrimaryAccent : DesignTokens.lightPrimaryAccent;
     final goldAccent = isDark ? DesignTokens.darkGoldAccent : DesignTokens.lightGoldAccent;
 
     return Column(
       children: [
+        // واجهة علوية مخصصة (Custom Header)
+        Container(
+          padding: const EdgeInsets.only(top: 50, left: 20, right: 20, bottom: 24),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                primaryAccent.withOpacity(0.9),
+                primaryAccent,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(30),
+              bottomRight: Radius.circular(30),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // الصف العلوي: الترحيب وزر الإعدادات على اليسار
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'السلام عليكم',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                          fontFamily: DesignTokens.fontCairo,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'تطبيق سكينة',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: DesignTokens.fontCairo,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              // بطاقة آخر قراءة
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isDark ? DesignTokens.darkCard : Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: primaryAccent.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.menu_book_rounded, color: primaryAccent),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'آخر قراءة',
+                            style: TextStyle(
+                              fontFamily: DesignTokens.fontCairo,
+                              fontSize: 12,
+                              color: textPrimary.withOpacity(0.6),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'سورة البقرة - آية ١',
+                            style: TextStyle(
+                              fontFamily: DesignTokens.fontCairo,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.play_circle_fill, color: primaryAccent, size: 36),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const BookReadingScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+
         // حقل البحث المريح
         Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
           child: TextField(
             controller: _searchController,
             onChanged: _filterSurahs,
@@ -72,7 +191,29 @@ class _HomeScreenState extends State<HomeScreen> {
             decoration: InputDecoration(
               hintText: 'ابحث عن سورة بالاسم أو الرقم...',
               hintStyle: TextStyle(fontFamily: DesignTokens.fontCairo, fontSize: 13, color: textPrimary.withOpacity(0.5)),
-              prefixIcon: Icon(Icons.search, color: goldAccent),
+              prefixIcon: Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.search, color: goldAccent),
+                    IconButton(
+                      icon: Icon(Icons.settings_outlined, color: textPrimary.withOpacity(0.5)),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SettingsScreen(
+                              onToggleTheme: widget.onToggleTheme,
+                              isDarkMode: widget.isDarkMode,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
               filled: true,
               fillColor: isDark ? DesignTokens.darkCard : DesignTokens.lightCard,
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -93,12 +234,18 @@ class _HomeScreenState extends State<HomeScreen> {
           child: _isLoading
               ? const Center(child: CircularProgressIndicator())
               : ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   itemCount: _filteredSurahs.length,
                   itemBuilder: (context, index) {
                     final surah = _filteredSurahs[index];
                     return Card(
                       margin: const EdgeInsets.only(bottom: 8),
+                      elevation: 0,
+                      color: isDark ? DesignTokens.darkCard.withOpacity(0.5) : Colors.white.withOpacity(0.5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: BorderSide(color: isDark ? DesignTokens.darkBorder : DesignTokens.lightBorder.withOpacity(0.5)),
+                      ),
                       child: ListTile(
                         onTap: () {
                           Navigator.push(
@@ -143,7 +290,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: textPrimary.withOpacity(0.6),
                           ),
                         ),
-                        trailing: Icon(Icons.arrow_forward_ios_rounded, size: 14, color: textPrimary.withOpacity(0.4)),
+                        trailing: Icon(Icons.arrow_forward_ios_rounded, size: 14, color: textPrimary.withOpacity(0.3)),
                       ),
                     );
                   },
@@ -163,16 +310,12 @@ class _HomeScreenState extends State<HomeScreen> {
       _buildSurahList(),
       const BookReadingScreen(),
       const TafsirDownloadScreen(),
-      SettingsScreen(onToggleTheme: widget.onToggleTheme, isDarkMode: widget.isDarkMode),
     ];
 
     return Scaffold(
-      appBar: _currentIndex == 0
-          ? AppBar(
-              title: const Text('تطبيق سكينة — القرآن الكريم'),
-            )
-          : null,
-      body: Column(
+      backgroundColor: isDark ? DesignTokens.darkBg : DesignTokens.lightBg,
+      // لا حاجة لـ AppBar هنا بعد الآن لأننا بنيناه بداخل الشاشة
+      body: Column( 
         children: [
           Expanded(child: pages[_currentIndex]),
           const MiniPlayerWidget(),
@@ -190,7 +333,6 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'الرئيسية'),
           BottomNavigationBarItem(icon: Icon(Icons.menu_book_outlined), activeIcon: Icon(Icons.menu_book), label: 'المصحف'),
           BottomNavigationBarItem(icon: Icon(Icons.cloud_download_outlined), activeIcon: Icon(Icons.cloud_download), label: 'التفاسير'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings_outlined), activeIcon: Icon(Icons.settings), label: 'الإعدادات'),
         ],
       ),
     );

@@ -4,6 +4,7 @@ import 'package:flutter_quran/flutter_quran.dart';
 import '../../core/theme/design_tokens.dart';
 import '../../data/models/tafsir_model.dart';
 import '../../data/services/api_service.dart';
+import '../../data/services/database_helper.dart';
 import 'surah_tafsir_reader_screen.dart';
 
 class TafsirSurahsScreen extends StatefulWidget {
@@ -22,6 +23,46 @@ class _TafsirSurahsScreenState extends State<TafsirSurahsScreen> {
   List<TafsirEdition> _tafsirs = [];
   TafsirEdition? _selectedTafsir;
   bool _isLoadingTafsirs = true;
+  bool _isDownloadingTafsir = false;
+
+  Future<void> _changeTafsir(TafsirEdition newTafsir) async {
+    final isDownloaded = await DatabaseHelper.instance.isTafsirDownloaded(newTafsir.key);
+    
+    if (isDownloaded) {
+      await DatabaseHelper.instance.changeDatabase('tafsir_${newTafsir.key}.db');
+      setState(() {
+        _selectedTafsir = newTafsir;
+      });
+      return;
+    }
+    
+    // غير محمل، سنحاول تحميله
+    setState(() {
+      _isDownloadingTafsir = true;
+    });
+    
+    final success = await DatabaseHelper.instance.downloadAndExtractTafsir(newTafsir.key, newTafsir.downloadZipUrl);
+    
+    if (success) {
+      await DatabaseHelper.instance.changeDatabase('tafsir_${newTafsir.key}.db');
+      setState(() {
+        _selectedTafsir = newTafsir;
+      });
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('تعذر التحميل تأكد من الاتصال بالانترنت', style: TextStyle(fontFamily: DesignTokens.fontCairo)),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+    
+    setState(() {
+      _isDownloadingTafsir = false;
+    });
+  }
 
   @override
   void initState() {
@@ -99,8 +140,20 @@ class _TafsirSurahsScreenState extends State<TafsirSurahsScreen> {
                       ),
                       const SizedBox(width: 16),
                       Expanded(
-                        child: _isLoadingTafsirs
-                            ? const Center(child: CircularProgressIndicator(color: Colors.white))
+                        child: _isLoadingTafsirs || _isDownloadingTafsir
+                            ? Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                  ),
+                                  if (_isDownloadingTafsir) const SizedBox(width: 8),
+                                  if (_isDownloadingTafsir) 
+                                    const Text('جاري التحميل...', style: TextStyle(color: Colors.white, fontFamily: DesignTokens.fontCairo)),
+                                ],
+                              )
                             : _tafsirs.isEmpty
                                 ? const Text(
                                     'التفسير الميسر',
@@ -143,9 +196,7 @@ class _TafsirSurahsScreenState extends State<TafsirSurahsScreen> {
                                       },
                                       onChanged: (TafsirEdition? newValue) {
                                         if (newValue != null && newValue.id != _selectedTafsir?.id) {
-                                          setState(() {
-                                            _selectedTafsir = newValue;
-                                          });
+                                          _changeTafsir(newValue);
                                         }
                                       },
                                       items: _tafsirs.map<DropdownMenuItem<TafsirEdition>>((TafsirEdition t) {

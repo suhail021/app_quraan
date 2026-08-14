@@ -8,10 +8,10 @@ class SurahHeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 70,
+      height: 48,
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      padding: const EdgeInsets.only(bottom: 8.0), // Push text up slightly to center it in the frame
+      margin: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.only(bottom: 4.0), // Push text up slightly to center it in the frame
       decoration: BoxDecoration(
         image: DecorationImage(
             image: AssetImage(Images().surahHeader), fit: BoxFit.fill),
@@ -21,7 +21,7 @@ class SurahHeaderWidget extends StatelessWidget {
         'سُورَةُ $surahName',
         style: FlutterQuran()
             .hafsStyle
-            .copyWith(fontWeight: FontWeight.w700, fontSize: 26, color: Colors.black),
+            .copyWith(fontWeight: FontWeight.w700, fontSize: 17, color: Colors.black),
       ),
     );
   }

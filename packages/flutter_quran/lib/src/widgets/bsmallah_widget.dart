@@ -11,7 +11,7 @@ class BasmallahWidget extends StatelessWidget {
         surahNumber == 97 || surahNumber == 95
             ? "بِّسۡـــــــمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيـــــــمِ"
             : 'بِسۡـــــــمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيـــــــمِ',
-        style: FlutterQuran().hafsStyle.copyWith(fontSize: 26),
+        style: FlutterQuran().hafsStyle.copyWith(fontSize: 20),
       ),
     );
   }

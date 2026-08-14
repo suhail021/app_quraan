@@ -13,128 +13,121 @@ class AyahTafsirBottomSheet extends StatefulWidget {
 }
 
 class _AyahTafsirBottomSheetState extends State<AyahTafsirBottomSheet> {
-  late Ayah _currentAyah;
-  String? _tafsirText;
-  bool _isLoading = true;
+  static List<Ayah>? _allAyahs;
+  late PageController _pageController;
+  late int _currentIndex;
+  
+  // Cache for loaded tafsir text by index
+  final Map<int, String> _tafsirCache = {};
 
   @override
   void initState() {
     super.initState();
-    _currentAyah = widget.initialAyah;
-    _fetchTafsir();
-    _updateHighlight();
+    
+    // Initialize the flattened list of all Ayahs once
+    if (_allAyahs == null) {
+      _allAyahs = [];
+      for (int i = 1; i <= 114; i++) {
+        _allAyahs!.addAll(FlutterQuran().getSurah(i).ayahs);
+      }
+    }
+
+    // Find the initial index
+    _currentIndex = _allAyahs!.indexWhere((a) => a.id == widget.initialAyah.id);
+    if (_currentIndex == -1) _currentIndex = 0; // Fallback
+
+    _pageController = PageController(initialPage: _currentIndex);
+    
+    _fetchTafsir(_currentIndex);
+    _updateHighlight(_allAyahs![_currentIndex]);
   }
 
   @override
   void dispose() {
-    // Remove highlight when closing
+    _pageController.dispose();
     FlutterQuran().removeBookmark(bookmarkId: 3);
     super.dispose();
   }
 
-  void _updateHighlight() {
-    // Remove old and set new temporary highlight (id 3)
+  void _updateHighlight(Ayah ayah) {
     FlutterQuran().removeBookmark(bookmarkId: 3);
     FlutterQuran().setBookmark(
-        ayahId: _currentAyah.id, page: _currentAyah.page, bookmarkId: 3);
+        ayahId: ayah.id, page: ayah.page, bookmarkId: 3);
     
-    // Auto navigate to the page if it's off-screen
-    if (FlutterQuran().getCurrentPageNumber() != _currentAyah.page) {
-      FlutterQuran().navigateToPage(_currentAyah.page);
+    if (FlutterQuran().getCurrentPageNumber() != ayah.page) {
+      FlutterQuran().navigateToPage(ayah.page);
     }
   }
 
-  Future<void> _fetchTafsir() async {
-    setState(() => _isLoading = true);
+  Future<void> _fetchTafsir(int index) async {
+    if (_tafsirCache.containsKey(index)) return;
     
-    final ayahsInSurah = await DatabaseHelper.instance.getAyahsBySurah(_currentAyah.surahNumber);
+    final ayah = _allAyahs![index];
+    
+    // UI Loading state is just missing key in cache (handled in build)
+    final ayahsInSurah = await DatabaseHelper.instance.getAyahsBySurah(ayah.surahNumber);
     final ayahModel = ayahsInSurah.firstWhere(
-      (a) => a.numberInSurah == _currentAyah.ayahNumber, 
+      (a) => a.numberInSurah == ayah.ayahNumber, 
       orElse: () => ayahsInSurah.first
     );
     
     if (mounted) {
       setState(() {
-        _tafsirText = ayahModel.tafsirMuyassar ?? 'لا يتوفر تفسير لهذه الآية حالياً.';
-        _isLoading = false;
+        _tafsirCache[index] = ayahModel.tafsirMuyassar ?? 'لا يتوفر تفسير لهذه الآية حالياً.';
       });
     }
   }
 
-  void _nextAyah() {
-    final nextAyah = FlutterQuran().getAyahByNumber(_currentAyah.surahNumber, _currentAyah.ayahNumber + 1) ??
-                     FlutterQuran().getAyahByNumber(_currentAyah.surahNumber + 1, 1);
+  void _onPageChanged(int index) {
+    final ayah = _allAyahs![index];
+    setState(() {
+      _currentIndex = index;
+    });
+    _updateHighlight(ayah);
+    _fetchTafsir(index);
     
-    if (nextAyah != null) {
-      setState(() {
-        _currentAyah = nextAyah!;
-      });
-      _updateHighlight();
-      _fetchTafsir();
-    }
+    // Pre-fetch next and previous tafsirs for smooth swiping
+    if (index < _allAyahs!.length - 1) _fetchTafsir(index + 1);
+    if (index > 0) _fetchTafsir(index - 1);
   }
 
-  void _prevAyah() {
-    Ayah? prevAyah;
-    if (_currentAyah.ayahNumber > 1) {
-      prevAyah = FlutterQuran().getAyahByNumber(_currentAyah.surahNumber, _currentAyah.ayahNumber - 1);
-    } else if (_currentAyah.surahNumber > 1) {
-      final prevSurah = FlutterQuran().getSurah(_currentAyah.surahNumber - 1);
-      prevAyah = FlutterQuran().getAyahByNumber(_currentAyah.surahNumber - 1, prevSurah.ayahs.length);
-    }
-    
-    if (prevAyah != null) {
-      setState(() {
-        _currentAyah = prevAyah!;
-      });
-      _updateHighlight();
-      _fetchTafsir();
-    }
-  }
-
-  void _toggleBookmark() {
+  void _toggleBookmark(Ayah currentAyah) {
     final bookmarks = FlutterQuran().getAllBookmarks();
     final mainBookmark = bookmarks.isNotEmpty ? bookmarks.first : null;
     
     if (mainBookmark != null) {
-      if (mainBookmark.ayahId == _currentAyah.id) {
+      if (mainBookmark.ayahId == currentAyah.id) {
         FlutterQuran().removeBookmark(bookmarkId: mainBookmark.id);
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تمت إزالة العلامة المرجعية')));
       } else {
         FlutterQuran().setBookmark(
-          ayahId: _currentAyah.id, 
-          page: _currentAyah.page, 
+          ayahId: currentAyah.id, 
+          page: currentAyah.page, 
           bookmarkId: mainBookmark.id
         );
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم حفظ العلامة المرجعية بنجاح')));
       }
-      setState(() {}); // Rebuild to update bookmark icon
+      setState(() {});
     }
   }
 
-  void _copyAyah() {
-    Clipboard.setData(ClipboardData(text: '﴿${_currentAyah.ayah}﴾')).then((_) {
+  void _copyAyah(Ayah currentAyah) {
+    Clipboard.setData(ClipboardData(text: '﴿${currentAyah.ayah}﴾')).then((_) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم نسخ الآية للحافظة')));
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final mainBookmark = FlutterQuran().getAllBookmarks().isNotEmpty 
-        ? FlutterQuran().getAllBookmarks().first 
-        : null;
-    final isBookmarked = mainBookmark != null && mainBookmark.ayahId == _currentAyah.id;
-
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+        padding: const EdgeInsets.only(top: 12.0),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
             // Top Handle
             Container(
@@ -147,115 +140,105 @@ class _AyahTafsirBottomSheetState extends State<AyahTafsirBottomSheet> {
             ),
             const SizedBox(height: 16),
             
-            // Header: Title and Actions
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    'تفسير الآية ${_currentAyah.ayahNumber} - سورة ${_currentAyah.surahNameAr}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold, 
-                      fontSize: 18, 
-                      color: Color(0xFFD4AF37),
-                    ),
-                  ),
-                ),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.copy_rounded),
-                      color: Colors.grey.shade600,
-                      tooltip: 'نسخ الآية',
-                      onPressed: _copyAyah,
-                    ),
-                    IconButton(
-                      icon: Icon(isBookmarked ? Icons.bookmark : Icons.bookmark_border),
-                      color: const Color(0xFFD4AF37),
-                      tooltip: 'حفظ كعلامة',
-                      onPressed: _toggleBookmark,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            
-            // Ayah Text
-            Container(
-              width: double.infinity,
-              margin: const EdgeInsets.symmetric(vertical: 12.0),
-              padding: const EdgeInsets.all(12.0),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF9F6EE), // Very light gold/cream
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.3), width: 1.5),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.03),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Text(
-                '${_currentAyah.ayah.trim()} ﴿${_currentAyah.ayahNumber}﴾',
-                style: const TextStyle(
-                  fontSize: 16, 
-                  height: 1.5,
-                  color: Color(0xFF1A1A1A), 
-                  fontFamily: 'hafs',
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            
-            // Tafsir
-            Flexible(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12.0),
-                  child: _isLoading 
-                    ? const Center(child: CircularProgressIndicator())
-                    : Text(
-                        _tafsirText ?? '',
-                        style: const TextStyle(
-                          fontSize: 18, 
-                          color: Colors.black87, 
-                          height: 1.5,
+            // PageView for swiping ayahs
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: _allAyahs!.length,
+                onPageChanged: _onPageChanged,
+                itemBuilder: (context, index) {
+                  final ayah = _allAyahs![index];
+                  final isBookmarked = FlutterQuran().getAllBookmarks().isNotEmpty 
+                      && FlutterQuran().getAllBookmarks().first.ayahId == ayah.id;
+                      
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Header: Title and Actions
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'تفسير الآية ${ayah.ayahNumber} - سورة ${ayah.surahNameAr}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold, 
+                                  fontSize: 18, 
+                                  color: Color(0xFFD4AF37),
+                                ),
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.copy_rounded),
+                                  color: Colors.grey.shade600,
+                                  tooltip: 'نسخ الآية',
+                                  onPressed: () => _copyAyah(ayah),
+                                ),
+                                IconButton(
+                                  icon: Icon(isBookmarked ? Icons.bookmark : Icons.bookmark_border),
+                                  color: const Color(0xFFD4AF37),
+                                  tooltip: 'حفظ كعلامة',
+                                  onPressed: () => _toggleBookmark(ayah),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                      ),
-                ),
-              ),
-            ),
-            
-            // Navigation Bottom Bar
-            Container(
-              padding: const EdgeInsets.only(top: 12.0),
-              decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.2))),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton.icon(
-                    icon: const Icon(Icons.arrow_back_ios_new, size: 16),
-                    label: const Text('الآية السابقة'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: const Color(0xFF2C3E50),
+                        
+                        // Ayah Text
+                        Container(
+                          margin: const EdgeInsets.symmetric(vertical: 12.0),
+                          padding: const EdgeInsets.all(12.0),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF9F6EE), 
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.3), width: 1.5),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.03),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            '${ayah.ayah.trim()} ﴿${ayah.ayahNumber}﴾',
+                            style: const TextStyle(
+                              fontSize: 16, 
+                              height: 1.5,
+                              color: Color(0xFF1A1A1A), 
+                              fontFamily: 'hafs',
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        
+                        // Tafsir
+                        Expanded(
+                          child: SingleChildScrollView(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 4.0),
+                              child: !_tafsirCache.containsKey(index)
+                                ? const Center(child: CircularProgressIndicator())
+                                : Text(
+                                    _tafsirCache[index] ?? '',
+                                    style: const TextStyle(
+                                      fontSize: 18, 
+                                      color: Colors.black87, 
+                                      height: 1.5,
+                                    ),
+                                  ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    onPressed: _prevAyah,
-                  ),
-                  TextButton.icon(
-                    icon: const Icon(Icons.arrow_forward_ios, size: 16),
-                    label: const Text('الآية التالية'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: const Color(0xFF2C3E50),
-                    ),
-                    // Swap icon and label positions for RTL
-                    iconAlignment: IconAlignment.end,
-                    onPressed: _nextAyah,
-                  ),
-                ],
+                  );
+                },
               ),
             ),
           ],

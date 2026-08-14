@@ -92,59 +92,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
 
-          // 📌 صندوق توضيح إعدادات الدومين بالسيرفر
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: primaryAccent.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: primaryAccent.withOpacity(0.3)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.dns, color: primaryAccent),
-                    const SizedBox(width: 8),
-                    Text(
-                      'رابط السيرفر والـ API (Domain Config)',
-                      style: TextStyle(
-                        fontFamily: DesignTokens.fontCairo,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: primaryAccent,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'الرابط الحالي المعتمد بكود التطبيق:',
-                  style: TextStyle(fontFamily: DesignTokens.fontCairo, fontSize: 12, color: textPrimary.withOpacity(0.7)),
-                ),
-                const SizedBox(height: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    ApiConfig.baseUrl,
-                    style: const TextStyle(fontFamily: 'monospace', fontWeight: FontWeight.bold, fontSize: 13),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  '💡 لتعديل الدومين مستقبلاً افتح هذا الملف بالكود:\nlib/core/config/api_config.dart',
-                  style: TextStyle(fontFamily: DesignTokens.fontCairo, fontSize: 11, height: 1.5, color: textPrimary.withOpacity(0.8)),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );

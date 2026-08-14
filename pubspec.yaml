@@ -33,6 +33,7 @@ dependencies:
   cached_network_image: ^3.4.1
   flutter_quran:
     path: packages/flutter_quran
+  archive: ^4.0.9
 
 dev_dependencies:
   flutter_test:

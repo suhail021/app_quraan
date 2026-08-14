@@ -74,7 +74,8 @@ class _BookReadingScreenState extends State<BookReadingScreen> {
     return Scaffold(
       key: _scaffoldKey,
       drawer: Builder(
-        builder: (innerContext) => _buildDrawer(isDark, textPrimary, innerContext),
+        builder: (innerContext) =>
+            _buildDrawer(isDark, textPrimary, innerContext),
       ),
       body: Stack(
         children: [
@@ -87,18 +88,28 @@ class _BookReadingScreenState extends State<BookReadingScreen> {
               useDefaultAppBar: false,
               onTafsirTap: (ayah) async {
                 // 1. Highlight the ayah temporarily using the search bookmark (id: 3)
-                FlutterQuran().setBookmark(ayahId: ayah.id, page: ayah.page, bookmarkId: 3);
-                
+                FlutterQuran().setBookmark(
+                  ayahId: ayah.id,
+                  page: ayah.page,
+                  bookmarkId: 3,
+                );
+
                 // 2. Fetch Tafsir
-                final ayahsInSurah = await DatabaseHelper.instance.getAyahsBySurah(ayah.surahNumber);
-                final index = ayahsInSurah.indexWhere((a) => a.numberInSurah == ayah.ayahNumber);
-                final nextAyah = index >= 0 && index < ayahsInSurah.length - 1 ? ayahsInSurah[index + 1] : null;
-                
+                final ayahsInSurah = await DatabaseHelper.instance
+                    .getAyahsBySurah(ayah.surahNumber);
+                final index = ayahsInSurah.indexWhere(
+                  (a) => a.numberInSurah == ayah.ayahNumber,
+                );
+                final nextAyah = index >= 0 && index < ayahsInSurah.length - 1
+                    ? ayahsInSurah[index + 1]
+                    : null;
+
                 if (mounted) {
                   // 3. Show BottomSheet
                   await showModalBottomSheet(
                     context: context,
-                    backgroundColor: Colors.transparent, // Let the container handle color/shape
+                    backgroundColor: Colors
+                        .transparent, // Let the container handle color/shape
                     isScrollControlled: true, // Allow it to be taller if needed
                     builder: (context) {
                       return Padding(
@@ -109,15 +120,17 @@ class _BookReadingScreenState extends State<BookReadingScreen> {
                         child: SafeArea(
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
-                              maxHeight: MediaQuery.of(context).size.height * 0.75, // Max 75% height
+                              maxHeight:
+                                  MediaQuery.of(context).size.height *
+                                  0.75, // Max 75% height
                             ),
                             child: AyahTafsirBottomSheet(initialAyah: ayah),
                           ),
                         ),
                       );
-                    }
+                    },
                   );
-                  
+
                   // 4. Remove highlight after bottom sheet closes
                   FlutterQuran().removeBookmark(bookmarkId: 3);
                 }
@@ -164,7 +177,9 @@ class _BookReadingScreenState extends State<BookReadingScreen> {
         right: 8,
       ),
       decoration: BoxDecoration(
-        color: isDark ? Colors.black.withOpacity(0.9) : Colors.white.withOpacity(0.95),
+        color: isDark
+            ? Colors.black.withOpacity(0.9)
+            : Colors.white.withOpacity(0.95),
         boxShadow: const [
           BoxShadow(
             color: Colors.black12,
@@ -179,17 +194,27 @@ class _BookReadingScreenState extends State<BookReadingScreen> {
           Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.bookmark, color: DesignTokens.lightPrimaryAccent),
+                icon: Icon(
+                  (FlutterQuran().getAllBookmarks().isNotEmpty &&
+                          FlutterQuran().getAllBookmarks().first.page != -1)
+                      ? Icons.bookmark
+                      : Icons.bookmark_border,
+                  color: DesignTokens.lightPrimaryAccent,
+                ),
                 tooltip: 'الانتقال للعلامة',
                 onPressed: () {
                   final bookmarks = FlutterQuran().getAllBookmarks();
-                  final mainBookmark = bookmarks.isNotEmpty ? bookmarks.first : null;
+                  final mainBookmark = bookmarks.isNotEmpty
+                      ? bookmarks.first
+                      : null;
                   if (mainBookmark != null && mainBookmark.page != -1) {
                     FlutterQuran().navigateToPage(mainBookmark.page);
                   } else {
                     // Show a toast that no bookmark is saved
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('لا توجد علامة محفوظة حالياً')),
+                      const SnackBar(
+                        content: Text('لا توجد علامة محفوظة حالياً'),
+                      ),
                     );
                   }
                 },
@@ -198,18 +223,18 @@ class _BookReadingScreenState extends State<BookReadingScreen> {
                 icon: Icon(Icons.menu_book, color: textPrimary),
                 tooltip: 'التفسير',
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const TafsirSurahsScreen()));
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.settings, color: textPrimary),
-                tooltip: 'الإعدادات',
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const TafsirSurahsScreen(),
+                    ),
+                  );
                 },
               ),
             ],
           ),
+          Spacer(flex: 1),
+
           Text(
             'المصحف الشريف',
             style: TextStyle(
@@ -219,11 +244,22 @@ class _BookReadingScreenState extends State<BookReadingScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
+          Spacer(flex: 1),
           IconButton(
             icon: Icon(Icons.search, color: textPrimary),
             tooltip: 'البحث عن سورة',
             onPressed: () {
               _scaffoldKey.currentState?.openDrawer();
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.settings, color: textPrimary),
+            tooltip: 'الإعدادات',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              );
             },
           ),
         ],
@@ -234,7 +270,9 @@ class _BookReadingScreenState extends State<BookReadingScreen> {
   Widget _buildBottomOverlay(bool isDark, Color textPrimary) {
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? Colors.black.withOpacity(0.9) : Colors.white.withOpacity(0.95),
+        color: isDark
+            ? Colors.black.withOpacity(0.9)
+            : Colors.white.withOpacity(0.95),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         boxShadow: const [
           BoxShadow(
@@ -258,7 +296,11 @@ class _BookReadingScreenState extends State<BookReadingScreen> {
     );
   }
 
-  Widget _buildDrawer(bool isDark, Color textPrimary, BuildContext innerContext) {
+  Widget _buildDrawer(
+    bool isDark,
+    Color textPrimary,
+    BuildContext innerContext,
+  ) {
     return Drawer(
       backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
       child: Column(
@@ -294,7 +336,8 @@ class _BookReadingScreenState extends State<BookReadingScreen> {
 
                 return ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: DesignTokens.lightPrimaryAccent.withOpacity(0.1),
+                    backgroundColor: DesignTokens.lightPrimaryAccent
+                        .withOpacity(0.1),
                     child: Text(
                       '$surahNum',
                       style: const TextStyle(

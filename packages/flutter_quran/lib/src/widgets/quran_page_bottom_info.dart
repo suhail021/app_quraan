@@ -25,7 +25,7 @@ class _QuranPageBottomInfoWidgetState extends State<QuranPageBottomInfoWidget> {
         child: Text(widget.page.toString().toArabic(),
             style: const TextStyle(
               color: Colors.black,
-              fontSize: 22,
+              fontSize: 16,
               fontWeight: FontWeight.w600,
               fontFamily: null, // Use system default which handles Arabic numerals perfectly
             )),

@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_quran/flutter_quran.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/design_tokens.dart';
 import '../../data/models/reciter_model.dart';
@@ -21,18 +22,44 @@ class _ReciterSurahsBottomSheetState extends State<ReciterSurahsBottomSheet>
   final ApiService _apiService = ApiService();
   Reciter? _reciter;
   List<Reciter> _allReciters = [];
-  bool _isLoading = true;
   String _searchQuery = '';
   late AnimationController _pulseController;
 
   @override
   void initState() {
     super.initState();
+    _reciter = _getDefaultMockReciter();
+    _allReciters = [_reciter!];
+
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     )..repeat(reverse: true);
-    _loadData();
+    
+    _loadData(); // يعمل في الخلفية بصمت
+  }
+
+  Reciter _getDefaultMockReciter() {
+    final defaultName = widget.reciterName.isNotEmpty ? widget.reciterName : 'أحمد بن عبدالله الغباني';
+    final surahs = <ReciterAudioFile>[];
+    for (int i = 1; i <= 114; i++) {
+      final s = FlutterQuran().getSurah(i);
+      surahs.add(ReciterAudioFile(
+        surahNumber: i,
+        surahNameAr: s.nameAr,
+        isBundled: false, // We just assume false for the mock until API loads
+        downloadUrl: '',
+      ));
+    }
+    return Reciter(
+      id: 1,
+      name: defaultName,
+      slug: 'ahmed-alghabani',
+      isActive: true,
+      totalAudioFiles: 114,
+      bundledAudioFilesCount: 39,
+      audioFiles: surahs,
+    );
   }
 
   @override
@@ -43,25 +70,25 @@ class _ReciterSurahsBottomSheetState extends State<ReciterSurahsBottomSheet>
 
   Future<void> _loadData() async {
     final list = await _apiService.fetchReciters();
+    if (list.isEmpty) return; // الاحتفاظ بالمحلي لو فشل كل شيء
     try {
       final reciter = list.firstWhere(
         (r) =>
             r.name.contains(widget.reciterName) ||
             widget.reciterName.contains(r.name),
+        orElse: () => list.first,
       );
       if (mounted) {
         setState(() {
           _allReciters = list;
           _reciter = reciter;
-          _isLoading = false;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _allReciters = list; // We still want to show the list even if matching fails
-          if (list.isNotEmpty) _reciter = list.first; // Fallback to first
-          _isLoading = false;
+          _allReciters = list;
+          if (list.isNotEmpty) _reciter = list.first;
         });
       }
     }
@@ -217,22 +244,17 @@ class _ReciterSurahsBottomSheetState extends State<ReciterSurahsBottomSheet>
                   ],
                 ),
                 const SizedBox(height: 20),
-                // Search Bar
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.3),
-                          ),
-                        ),
-                        child: TextField(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: TextField(
                           onChanged: (val) {
                             setState(() {
                               _searchQuery = val.trim();
@@ -261,18 +283,14 @@ class _ReciterSurahsBottomSheetState extends State<ReciterSurahsBottomSheet>
                         ),
                       ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-              ],
+                  const SizedBox(height: 24),
+                ],
             ),
           ),
 
           // List Section
           Expanded(
-            child: _isLoading
-                ? Center(child: CircularProgressIndicator(color: primaryAccent))
-                : _reciter == null
+            child: _reciter == null
                 ? Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -442,7 +460,7 @@ class _ReciterSurahsBottomSheetState extends State<ReciterSurahsBottomSheet>
                                                   : 1.0,
                                               child: IconButton(
                                                 icon: Icon(
-                                                  isPlaying
+                                                  (isPlaying && player.isPlaying)
                                                       ? Icons
                                                             .pause_circle_filled_rounded
                                                       : isDownloaded
@@ -457,7 +475,7 @@ class _ReciterSurahsBottomSheetState extends State<ReciterSurahsBottomSheet>
                                                             .withOpacity(0.6),
                                                   size: 36,
                                                 ),
-                                                onPressed: () {
+                                                onPressed: () async {
                                                   if (isPlaying &&
                                                       player.isPlaying) {
                                                     player.pause();
@@ -465,16 +483,27 @@ class _ReciterSurahsBottomSheetState extends State<ReciterSurahsBottomSheet>
                                                       !player.isPlaying) {
                                                     player.resume();
                                                   } else {
-                                                    player.downloadAndPlaySurah(
-                                                      surahNumber:
-                                                          file.surahNumber,
-                                                      surahName:
-                                                          file.surahNameAr,
-                                                      reciterName:
-                                                          _reciter!.name,
-                                                      streamUrl:
-                                                          file.downloadUrl,
-                                                    );
+                                                    try {
+                                                      await player.downloadAndPlaySurah(
+                                                        surahNumber:
+                                                            file.surahNumber,
+                                                        surahName:
+                                                            file.surahNameAr,
+                                                        reciterName:
+                                                            _reciter!.name,
+                                                        streamUrl:
+                                                            file.downloadUrl,
+                                                      );
+                                                    } on OfflineAudioException catch (e) {
+                                                      if (context.mounted) {
+                                                        ScaffoldMessenger.of(context).showSnackBar(
+                                                          SnackBar(
+                                                            content: Text(e.message, style: const TextStyle(fontFamily: DesignTokens.fontCairo)),
+                                                            backgroundColor: Colors.red,
+                                                          ),
+                                                        );
+                                                      }
+                                                    }
                                                   }
                                                 },
                                               ),
