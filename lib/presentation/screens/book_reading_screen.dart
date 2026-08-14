@@ -5,7 +5,6 @@ import '../../core/theme/design_tokens.dart';
 import '../../data/services/database_helper.dart';
 import '../widgets/mini_player_widget.dart';
 import 'settings_screen.dart';
-import 'reciters_screen.dart';
 import 'tafsir_download_screen.dart';
 import 'tafsir_surahs_screen.dart';
 import '../widgets/ayah_tafsir_bottom_sheet.dart';

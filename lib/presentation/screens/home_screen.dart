@@ -4,7 +4,6 @@ import '../../data/models/surah_model.dart';
 import '../../data/services/database_helper.dart';
 import '../widgets/mini_player_widget.dart';
 import 'book_reading_screen.dart';
-import 'reciters_screen.dart';
 import 'tafsir_download_screen.dart';
 import 'settings_screen.dart';
 
@@ -163,7 +162,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final pages = [
       _buildSurahList(),
       const BookReadingScreen(),
-      const RecitersScreen(),
       const TafsirDownloadScreen(),
       SettingsScreen(onToggleTheme: widget.onToggleTheme, isDarkMode: widget.isDarkMode),
     ];
@@ -191,7 +189,6 @@ class _HomeScreenState extends State<HomeScreen> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'الرئيسية'),
           BottomNavigationBarItem(icon: Icon(Icons.menu_book_outlined), activeIcon: Icon(Icons.menu_book), label: 'المصحف'),
-          BottomNavigationBarItem(icon: Icon(Icons.headphones_outlined), activeIcon: Icon(Icons.headphones), label: 'الاستماع'),
           BottomNavigationBarItem(icon: Icon(Icons.cloud_download_outlined), activeIcon: Icon(Icons.cloud_download), label: 'التفاسير'),
           BottomNavigationBarItem(icon: Icon(Icons.settings_outlined), activeIcon: Icon(Icons.settings), label: 'الإعدادات'),
         ],

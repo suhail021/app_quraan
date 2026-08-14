@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/design_tokens.dart';
 import '../../data/services/audio_player_service.dart';
-import '../screens/reciters_screen.dart';
-import 'full_player_widget.dart';
 import 'reciter_surahs_bottom_sheet.dart';
 
 class MiniPlayerWidget extends StatelessWidget {
@@ -20,20 +18,18 @@ class MiniPlayerWidget extends StatelessWidget {
 
     final bool isPlayingAny = playerService.currentSurahName.isNotEmpty;
     final String displaySurah = isPlayingAny ? playerService.currentSurahName : 'سورة الفاتحة';
-    final String displayReciter = isPlayingAny ? playerService.currentReciterName : 'القارئ الإفتراضي (جاهز للتشغيل)';
+    final String displayReciter = isPlayingAny ? playerService.currentReciterName : 'أحمد بن عبدالله الغباني';
 
     return GestureDetector(
       onTap: () {
-        if (!isPlayingAny) {
-          import_reciters_screen(context);
-        } else {
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            backgroundColor: Colors.transparent,
-            builder: (context) => const FullPlayerWidget(),
-          );
-        }
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => ReciterSurahsBottomSheet(
+            reciterName: playerService.currentReciterName.isNotEmpty ? playerService.currentReciterName : '',
+          ),
+        );
       },
       child: Container(
         height: 85,
@@ -79,14 +75,14 @@ class MiniPlayerWidget extends StatelessWidget {
                     Expanded(
                       child: GestureDetector(
                         onTap: () {
-                          if (isPlayingAny) {
-                            showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              backgroundColor: Colors.transparent,
-                              builder: (context) => ReciterSurahsBottomSheet(reciterName: playerService.currentReciterName),
-                            );
-                          }
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => ReciterSurahsBottomSheet(
+                              reciterName: playerService.currentReciterName.isNotEmpty ? playerService.currentReciterName : '',
+                            ),
+                          );
                         },
                         child: Container(
                           color: Colors.transparent,
@@ -147,7 +143,7 @@ class MiniPlayerWidget extends StatelessWidget {
                               playerService.playSurah(
                                 surahNumber: 1,
                                 surahName: 'الفاتحة',
-                                reciterName: 'أحمد الغباني',
+                                reciterName: 'أحمد بن عبدالله الغباني',
                               );
                             } else {
                               playerService.togglePlayPause();
@@ -172,9 +168,5 @@ class MiniPlayerWidget extends StatelessWidget {
         ),
       ),
     );
-  }
-  
-  void import_reciters_screen(BuildContext context) {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => const RecitersScreen()));
   }
 }
