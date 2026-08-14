@@ -8,7 +8,7 @@ class ApiService {
   /// جلب قائمة كل القراء وسورهم من الباك إند
   Future<List<Reciter>> fetchReciters() async {
     try {
-      final response = await http.get(Uri.parse('${ApiConfig.baseUrl}/reciters'));
+      final response = await http.post(Uri.parse('${ApiConfig.baseUrl}/reciters'));
 
       if (response.statusCode == 200) {
         final decoded = json.decode(response.body);
@@ -27,7 +27,7 @@ class ApiService {
   /// جلب تفاصيل قارئ معين بواسطة الـ slug
   Future<Reciter?> fetchReciterBySlug(String slug) async {
     try {
-      final response = await http.get(Uri.parse('${ApiConfig.baseUrl}/reciters/$slug'));
+      final response = await http.post(Uri.parse('${ApiConfig.baseUrl}/reciters/$slug'));
 
       if (response.statusCode == 200) {
         final decoded = json.decode(response.body);
@@ -45,7 +45,7 @@ class ApiService {
   /// جلب قائمة التفاسير المتاحة للتحميل
   Future<List<TafsirEdition>> fetchTafsirs() async {
     try {
-      final response = await http.get(Uri.parse('${ApiConfig.baseUrl}/tafsirs'));
+      final response = await http.post(Uri.parse('${ApiConfig.baseUrl}/tafsirs'));
 
       if (response.statusCode == 200) {
         final decoded = json.decode(response.body);
