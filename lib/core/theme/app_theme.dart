@@ -10,10 +10,15 @@ class AppTheme {
       primaryColor: DesignTokens.lightPrimaryAccent,
       colorScheme: const ColorScheme.light(
         primary: DesignTokens.lightPrimaryAccent,
-        secondary: DesignTokens.lightGoldAccent,
+        secondary: DesignTokens.lightPrimaryAccent,
         surface: DesignTokens.lightCard,
+        surfaceContainerHighest: DesignTokens.lightAyahHighlight,
+        onSurface: DesignTokens.lightTextPrimary,
+        onSurfaceVariant: DesignTokens.lightTextSecondary,
+        outline: DesignTokens.lightBorder,
       ),
       fontFamily: DesignTokens.fontCairo,
+      dividerColor: DesignTokens.lightBorder,
       cardTheme: const CardThemeData(
         color: DesignTokens.lightCard,
         elevation: 0,
@@ -27,14 +32,21 @@ class AppTheme {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: DesignTokens.lightTextPrimary),
+        iconTheme: IconThemeData(color: DesignTokens.lightPrimaryAccent),
         titleTextStyle: TextStyle(
           fontFamily: DesignTokens.fontCairo,
-          color: DesignTokens.lightTextPrimary,
+          color: DesignTokens.lightPrimaryAccent,
           fontSize: 18,
           fontWeight: FontWeight.bold,
         ),
       ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: DesignTokens.lightCard,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+      ),
+      iconTheme: const IconThemeData(color: DesignTokens.lightPrimaryAccent),
     );
   }
 
@@ -46,10 +58,15 @@ class AppTheme {
       primaryColor: DesignTokens.darkPrimaryAccent,
       colorScheme: const ColorScheme.dark(
         primary: DesignTokens.darkPrimaryAccent,
-        secondary: DesignTokens.darkGoldAccent,
+        secondary: DesignTokens.darkPrimaryAccent,
         surface: DesignTokens.darkCard,
+        surfaceContainerHighest: DesignTokens.darkAyahHighlight,
+        onSurface: DesignTokens.darkTextPrimary,
+        onSurfaceVariant: DesignTokens.darkTextSecondary,
+        outline: DesignTokens.darkBorder,
       ),
       fontFamily: DesignTokens.fontCairo,
+      dividerColor: DesignTokens.darkBorder,
       cardTheme: const CardThemeData(
         color: DesignTokens.darkCard,
         elevation: 0,
@@ -71,6 +88,13 @@ class AppTheme {
           fontWeight: FontWeight.bold,
         ),
       ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: DesignTokens.darkCard,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+      ),
+      iconTheme: const IconThemeData(color: DesignTokens.darkTextPrimary),
     );
   }
 }

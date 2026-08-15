@@ -89,12 +89,13 @@ class _TafsirSurahsScreenState extends State<TafsirSurahsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? const Color(0xFF1A1A2E) : const Color(0xFFF7F7F9);
-    final textPrimary = isDark ? Colors.white : const Color(0xFF2D2D2D);
-    final textSecondary = isDark ? Colors.white70 : const Color(0xFF6B7280);
-    final primaryAccent = isDark ? DesignTokens.darkPrimaryAccent : DesignTokens.lightPrimaryAccent;
-    final cardBg = isDark ? const Color(0xFF252538) : Colors.white;
+    final bgColor = Theme.of(context).scaffoldBackgroundColor;
+    final textPrimary = colorScheme.onSurface;
+    final textSecondary = colorScheme.onSurfaceVariant;
+    final primaryAccent = colorScheme.primary;
+    final cardBg = colorScheme.surface;
 
     final filteredSurahs = _allSurahs.where((s) => s.nameAr.contains(_searchQuery)).toList();
 
@@ -106,7 +107,7 @@ class _TafsirSurahsScreenState extends State<TafsirSurahsScreen> {
           color: bgColor, // خلفية باقي الشاشة
           child: Column(
             children: [
-            // Header Section with Gradient
+            // Header Section
             Container(
               padding: const EdgeInsets.only(top: 10, bottom: 24, left: 8, right: 16),
               decoration: BoxDecoration(
@@ -278,34 +279,35 @@ class _TafsirSurahsScreenState extends State<TafsirSurahsScreen> {
                         final surahNumber = _allSurahs.indexOf(surah) + 1; // get original 1-based index
 
                         return Container(
-                          margin: const EdgeInsets.only(bottom: 12),
+                          margin: const EdgeInsets.only(bottom: 8),
                           decoration: BoxDecoration(
                             color: cardBg,
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
+                                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
                               ),
                             ],
                           ),
                           child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                            minVerticalPadding: 0,
                             leading: Container(
-                              width: 44,
-                              height: 44,
+                              width: 36,
+                              height: 36,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: primaryAccent.withOpacity(0.1),
+                                color: primaryAccent.withValues(alpha: 0.1),
                               ),
                               child: Text(
                                 '$surahNumber',
                                 style: TextStyle(
                                   fontFamily: DesignTokens.fontCairo,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                                  fontSize: 14,
                                   color: primaryAccent,
                                 ),
                               ),
@@ -315,7 +317,7 @@ class _TafsirSurahsScreenState extends State<TafsirSurahsScreen> {
                               style: TextStyle(
                                 fontFamily: DesignTokens.fontCairo,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 18,
+                                fontSize: 16,
                                 color: textPrimary,
                               ),
                             ),
@@ -323,17 +325,17 @@ class _TafsirSurahsScreenState extends State<TafsirSurahsScreen> {
                               'عدد آياتها: ${surah.ayahs.length}',
                               style: TextStyle(
                                 fontFamily: DesignTokens.fontCairo,
-                                fontSize: 13,
+                                fontSize: 12,
                                 color: textSecondary,
                               ),
                             ),
                             trailing: Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: primaryAccent.withOpacity(0.05),
+                                color: primaryAccent.withValues(alpha: 0.05),
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              child: Icon(Icons.arrow_forward_ios_rounded, size: 16, color: primaryAccent),
+                              child: Icon(Icons.arrow_forward_ios_rounded, size: 14, color: primaryAccent),
                             ),
                             onTap: () {
                               Navigator.push(

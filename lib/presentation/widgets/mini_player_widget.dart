@@ -11,10 +11,10 @@ class MiniPlayerWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final playerService = Provider.of<AudioPlayerService>(context);
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardBg = isDark ? DesignTokens.darkCard : DesignTokens.lightCard;
-    final primaryAccent = isDark ? DesignTokens.darkPrimaryAccent : DesignTokens.lightPrimaryAccent;
-    final textPrimary = isDark ? DesignTokens.darkTextPrimary : DesignTokens.lightTextPrimary;
+    final colorScheme = Theme.of(context).colorScheme;
+    final cardBg = colorScheme.surface;
+    final primaryAccent = colorScheme.primary;
+    final textPrimary = colorScheme.onSurface;
 
     final bool isPlayingAny = playerService.currentSurahName.isNotEmpty;
     final String displaySurah = isPlayingAny ? playerService.currentSurahName : 'سورة الفاتحة';
@@ -45,7 +45,7 @@ class MiniPlayerWidget extends StatelessWidget {
             ),
           ],
           border: Border.all(
-            color: isDark ? DesignTokens.darkBorder : DesignTokens.lightBorder,
+            color: colorScheme.outline,
           ),
         ),
         child: Column(

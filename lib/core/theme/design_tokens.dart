@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
 class DesignTokens {
-  // Light Mode Colors
-  static const Color lightBg = Color(0xFFFBF9F4);
+  // Light Mode Colors (Blue Theme Aesthetic)
+  static const Color lightBg = Color(0xFFF4F7FB); // Very light cool blue instead of beige
   static const Color lightCard = Color(0xFFFFFFFF);
-  static const Color lightTextPrimary = Color(0xFF1A2333);
-  static const Color lightTextSecondary = Color(0xFF6B7280);
-  static const Color lightPrimaryAccent = Color(0xFF1E3A5F);
-  static const Color lightGoldAccent = Color(0xFFB8935F);
-  static const Color lightAyahHighlight = Color(0xFFF0EBDF);
-  static const Color lightBorder = Color(0xFFE8E4DA);
+  static const Color lightTextPrimary = Color(0xFF1A2333); // Deep dark blue
+  static const Color lightTextSecondary = Color(0xFF64748B); // Cool slate gray
+  static const Color lightPrimaryAccent = Color(0xFF1E3A5F); // The dark blue the user liked
+  static const Color lightGoldAccent = Color(0xFFB8935F); // Gold is still a great accent
+  static const Color lightAyahHighlight = Color(0xFFE6F0FA); // Soft blue highlight
+  static const Color lightBorder = Color(0xFFE2E8F0); // Cool gray border
 
   // Dark Mode Colors
   static const Color darkBg = Color(0xFF14182B);

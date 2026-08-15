@@ -96,13 +96,13 @@ class _ReciterSurahsBottomSheetState extends State<ReciterSurahsBottomSheet>
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? const Color(0xFF1A1A2E) : const Color(0xFFF7F7F9);
-    final textPrimary = isDark ? Colors.white : const Color(0xFF2D2D2D);
-    final textSecondary = isDark ? Colors.white70 : const Color(0xFF6B7280);
-    final primaryAccent = isDark
-        ? DesignTokens.darkPrimaryAccent
-        : DesignTokens.lightPrimaryAccent;
+    final bgColor = Theme.of(context).scaffoldBackgroundColor;
+    final textPrimary = colorScheme.onSurface;
+    final textSecondary = colorScheme.onSurfaceVariant;
+    final primaryAccent = colorScheme.primary;
+    final cardBg = colorScheme.surface;
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
@@ -125,14 +125,7 @@ class _ReciterSurahsBottomSheetState extends State<ReciterSurahsBottomSheet>
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(32),
               ),
-              gradient: LinearGradient(
-                colors: [
-                  primaryAccent.withOpacity(0.9),
-                  primaryAccent.withOpacity(0.7),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: primaryAccent,
             ),
             child: Column(
               children: [
@@ -368,40 +361,41 @@ class _ReciterSurahsBottomSheetState extends State<ReciterSurahsBottomSheet>
                                   player.currentReciterName == _reciter!.name;
 
                               return Container(
-                                margin: const EdgeInsets.only(bottom: 12),
+                                margin: const EdgeInsets.only(bottom: 8),
                                 decoration: BoxDecoration(
                                   color: isDark
                                       ? const Color(0xFF252538)
                                       : Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
+                                  borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
                                     color: isPlaying
-                                        ? primaryAccent.withOpacity(0.5)
+                                        ? primaryAccent.withValues(alpha: 0.5)
                                         : Colors.transparent,
-                                    width: 1.5,
+                                    width: 1.0,
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(
-                                        isDark ? 0.2 : 0.05,
+                                      color: Colors.black.withValues(
+                                        alpha: isDark ? 0.2 : 0.05,
                                       ),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 4),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 2),
                                     ),
                                   ],
                                 ),
                                 child: ListTile(
                                   contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 8,
+                                    horizontal: 12,
+                                    vertical: 0,
                                   ),
+                                  minVerticalPadding: 0,
                                   leading: Container(
-                                    width: 40,
-                                    height: 40,
+                                    width: 34,
+                                    height: 34,
                                     decoration: BoxDecoration(
                                       color: isPlaying
                                           ? primaryAccent
-                                          : primaryAccent.withOpacity(0.1),
+                                          : primaryAccent.withValues(alpha: 0.1),
                                       shape: BoxShape.circle,
                                     ),
                                     alignment: Alignment.center,
@@ -409,7 +403,7 @@ class _ReciterSurahsBottomSheetState extends State<ReciterSurahsBottomSheet>
                                       file.surahNumber.toString(),
                                       style: TextStyle(
                                         fontFamily: DesignTokens.fontCairo,
-                                        fontSize: 14,
+                                        fontSize: 13,
                                         fontWeight: FontWeight.bold,
                                         color: isPlaying
                                             ? Colors.white
@@ -422,7 +416,7 @@ class _ReciterSurahsBottomSheetState extends State<ReciterSurahsBottomSheet>
                                     style: TextStyle(
                                       fontFamily: DesignTokens.fontCairo,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                                      fontSize: 15,
                                       color: textPrimary,
                                     ),
                                   ),
@@ -432,7 +426,7 @@ class _ReciterSurahsBottomSheetState extends State<ReciterSurahsBottomSheet>
                                         : 'تتطلب تحميل',
                                     style: TextStyle(
                                       fontFamily: DesignTokens.fontCairo,
-                                      fontSize: 12,
+                                      fontSize: 11,
                                       color: textSecondary,
                                     ),
                                   ),

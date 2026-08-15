@@ -119,13 +119,14 @@ class _AyahTafsirBottomSheetState extends State<AyahTafsirBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Container(
         padding: const EdgeInsets.only(top: 12.0),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
           children: [
@@ -163,10 +164,10 @@ class _AyahTafsirBottomSheetState extends State<AyahTafsirBottomSheet> {
                             Expanded(
                               child: Text(
                                 'تفسير الآية ${ayah.ayahNumber} - سورة ${ayah.surahNameAr}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.bold, 
                                   fontSize: 18, 
-                                  color: Color(0xFFD4AF37),
+                                  color: colorScheme.primary,
                                 ),
                               ),
                             ),
@@ -180,7 +181,7 @@ class _AyahTafsirBottomSheetState extends State<AyahTafsirBottomSheet> {
                                 ),
                                 IconButton(
                                   icon: Icon(isBookmarked ? Icons.bookmark : Icons.bookmark_border),
-                                  color: const Color(0xFFD4AF37),
+                                  color: colorScheme.primary,
                                   tooltip: 'حفظ كعلامة',
                                   onPressed: () => _toggleBookmark(ayah),
                                 ),
@@ -194,9 +195,9 @@ class _AyahTafsirBottomSheetState extends State<AyahTafsirBottomSheet> {
                           margin: const EdgeInsets.symmetric(vertical: 12.0),
                           padding: const EdgeInsets.all(12.0),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF9F6EE), 
+                            color: colorScheme.primary.withOpacity(0.05), 
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.3), width: 1.5),
+                            border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3), width: 1.5),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withValues(alpha: 0.03),
@@ -207,10 +208,10 @@ class _AyahTafsirBottomSheetState extends State<AyahTafsirBottomSheet> {
                           ),
                           child: Text(
                             '${ayah.ayah.trim()} ﴿${ayah.ayahNumber}﴾',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16, 
                               height: 1.5,
-                              color: Color(0xFF1A1A1A), 
+                              color: colorScheme.onSurface, 
                               fontFamily: 'hafs',
                             ),
                             textAlign: TextAlign.center,
@@ -226,9 +227,9 @@ class _AyahTafsirBottomSheetState extends State<AyahTafsirBottomSheet> {
                                 ? const Center(child: CircularProgressIndicator())
                                 : Text(
                                     _tafsirCache[index] ?? '',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 18, 
-                                      color: Colors.black87, 
+                                      color: colorScheme.onSurface, 
                                       height: 1.5,
                                     ),
                                   ),

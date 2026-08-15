@@ -17,7 +17,8 @@ class BookReadingScreen extends StatefulWidget {
 }
 
 class _BookReadingScreenState extends State<BookReadingScreen> {
-  bool _showOverlay = false;
+  bool _showOverlay = true;
+  String _drawerSearchQuery = '';
   Timer? _hideTimer;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -68,14 +69,14 @@ class _BookReadingScreenState extends State<BookReadingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary = isDark ? Colors.white : Colors.black87;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textPrimary = colorScheme.onSurface;
 
     return Scaffold(
       key: _scaffoldKey,
       drawer: Builder(
         builder: (innerContext) =>
-            _buildDrawer(isDark, textPrimary, innerContext),
+            _buildDrawer(innerContext),
       ),
       body: Stack(
         children: [
@@ -147,7 +148,7 @@ class _BookReadingScreenState extends State<BookReadingScreen> {
             right: 0,
             child: GestureDetector(
               onTap: _resetTimer,
-              child: _buildTopOverlay(isDark, textPrimary),
+              child: _buildTopOverlay(colorScheme, textPrimary),
             ),
           ),
 
@@ -160,7 +161,7 @@ class _BookReadingScreenState extends State<BookReadingScreen> {
             right: 0,
             child: GestureDetector(
               onTap: _resetTimer,
-              child: _buildBottomOverlay(isDark, textPrimary),
+              child: _buildBottomOverlay(colorScheme, textPrimary),
             ),
           ),
         ],
@@ -168,7 +169,7 @@ class _BookReadingScreenState extends State<BookReadingScreen> {
     );
   }
 
-  Widget _buildTopOverlay(bool isDark, Color textPrimary) {
+  Widget _buildTopOverlay(ColorScheme colorScheme, Color textPrimary) {
     return Container(
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 8,
@@ -177,9 +178,7 @@ class _BookReadingScreenState extends State<BookReadingScreen> {
         right: 8,
       ),
       decoration: BoxDecoration(
-        color: isDark
-            ? Colors.black.withOpacity(0.9)
-            : Colors.white.withOpacity(0.95),
+        color: colorScheme.surface.withOpacity(0.95),
         boxShadow: const [
           BoxShadow(
             color: Colors.black12,
@@ -199,7 +198,7 @@ class _BookReadingScreenState extends State<BookReadingScreen> {
                           FlutterQuran().getAllBookmarks().first.page != -1)
                       ? Icons.bookmark
                       : Icons.bookmark_border,
-                  color: DesignTokens.lightPrimaryAccent,
+                  color: colorScheme.primary,
                 ),
                 tooltip: 'الانتقال للعلامة',
                 onPressed: () {
@@ -220,7 +219,7 @@ class _BookReadingScreenState extends State<BookReadingScreen> {
                 },
               ),
               IconButton(
-                icon: Icon(Icons.menu_book, color: textPrimary),
+                icon: const Icon(Icons.menu_book),
                 tooltip: 'التفسير',
                 onPressed: () {
                   Navigator.push(
@@ -246,14 +245,14 @@ class _BookReadingScreenState extends State<BookReadingScreen> {
           ),
           Spacer(flex: 1),
           IconButton(
-            icon: Icon(Icons.search, color: textPrimary),
+            icon: const Icon(Icons.search),
             tooltip: 'البحث عن سورة',
             onPressed: () {
               _scaffoldKey.currentState?.openDrawer();
             },
           ),
           IconButton(
-            icon: Icon(Icons.settings, color: textPrimary),
+            icon: const Icon(Icons.settings),
             tooltip: 'الإعدادات',
             onPressed: () {
               Navigator.push(
@@ -267,12 +266,10 @@ class _BookReadingScreenState extends State<BookReadingScreen> {
     );
   }
 
-  Widget _buildBottomOverlay(bool isDark, Color textPrimary) {
+  Widget _buildBottomOverlay(ColorScheme colorScheme, Color textPrimary) {
     return Container(
       decoration: BoxDecoration(
-        color: isDark
-            ? Colors.black.withOpacity(0.9)
-            : Colors.white.withOpacity(0.95),
+        color: colorScheme.surface.withOpacity(0.95),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         boxShadow: const [
           BoxShadow(
@@ -296,18 +293,17 @@ class _BookReadingScreenState extends State<BookReadingScreen> {
     );
   }
 
-  Widget _buildDrawer(
-    bool isDark,
-    Color textPrimary,
-    BuildContext innerContext,
-  ) {
+  Widget _buildDrawer(BuildContext innerContext) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textPrimary = colorScheme.onSurface;
+
     return Drawer(
-      backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+      backgroundColor: colorScheme.surface,
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.only(top: 50, bottom: 20),
-            color: DesignTokens.lightPrimaryAccent,
+            color: colorScheme.primary,
             width: double.infinity,
             child: Column(
               children: [
@@ -322,60 +318,108 @@ class _BookReadingScreenState extends State<BookReadingScreen> {
                     color: Colors.white,
                   ),
                 ),
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: TextField(
+                    onChanged: (val) {
+                      setState(() {
+                        _drawerSearchQuery = val.trim();
+                      });
+                    },
+                    style: const TextStyle(fontFamily: DesignTokens.fontCairo, color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: 'ابحث عن سورة...',
+                      hintStyle: TextStyle(fontFamily: DesignTokens.fontCairo, color: Colors.white70),
+                      prefixIcon: const Icon(Icons.search, color: Colors.white),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.white54),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.white54),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.white),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              padding: EdgeInsets.zero,
-              itemCount: 114,
-              itemBuilder: (context, index) {
-                final surahNum = index + 1;
-                final surah = FlutterQuran().getSurah(surahNum);
-                final startJozz = surah.ayahs.first.jozz;
+            child: Builder(
+              builder: (context) {
+                final filteredIndices = List.generate(114, (i) => i + 1).where((surahNum) {
+                  if (_drawerSearchQuery.isEmpty) return true;
+                  final surah = FlutterQuran().getSurah(surahNum);
+                  return surah.nameAr.contains(_drawerSearchQuery) || surahNum.toString().contains(_drawerSearchQuery);
+                }).toList();
 
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: DesignTokens.lightPrimaryAccent
-                        .withOpacity(0.1),
+                if (filteredIndices.isEmpty) {
+                  return const Center(
                     child: Text(
-                      '$surahNum',
-                      style: const TextStyle(
-                        fontFamily: DesignTokens.fontCairo,
-                        color: DesignTokens.lightPrimaryAccent,
-                        fontWeight: FontWeight.bold,
+                      'لم يتم العثور على سورة',
+                      style: TextStyle(fontFamily: DesignTokens.fontCairo, fontSize: 16),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: EdgeInsets.zero,
+                  itemCount: filteredIndices.length,
+                  itemBuilder: (context, index) {
+                    final surahNum = filteredIndices[index];
+                    final surah = FlutterQuran().getSurah(surahNum);
+                    final startJozz = surah.ayahs.first.jozz;
+
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
+                        child: Text(
+                          '$surahNum',
+                          style: TextStyle(
+                            fontFamily: DesignTokens.fontCairo,
+                            color: colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  title: Text(
-                    'سورة ${surah.nameAr}',
-                    style: TextStyle(
-                      fontFamily: DesignTokens.fontCairo,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: textPrimary,
-                    ),
-                  ),
-                  subtitle: Text(
-                    'الجزء $startJozz • صفحة ${surah.startPage}',
-                    style: TextStyle(
-                      fontFamily: DesignTokens.fontCairo,
-                      fontSize: 13,
-                      color: textPrimary.withOpacity(0.6),
-                    ),
-                  ),
-                  onTap: () {
-                    // Close the drawer
-                    Navigator.pop(innerContext);
-                    // Hide overlay
-                    setState(() {
-                      _showOverlay = false;
-                    });
-                    // Navigate to Surah
-                    FlutterQuran().navigateToSurah(surahNum);
+                      title: Text(
+                        'سورة ${surah.nameAr}',
+                        style: TextStyle(
+                          fontFamily: DesignTokens.fontCairo,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: textPrimary,
+                        ),
+                      ),
+                      subtitle: Text(
+                        'الجزء $startJozz • صفحة ${surah.startPage}',
+                        style: TextStyle(
+                          fontFamily: DesignTokens.fontCairo,
+                          fontSize: 13,
+                          color: textPrimary.withValues(alpha: 0.6),
+                        ),
+                      ),
+                      onTap: () {
+                        // Close the drawer
+                        Navigator.pop(innerContext);
+                        // Hide overlay
+                        setState(() {
+                          _showOverlay = false;
+                        });
+                        // Navigate to Surah
+                        FlutterQuran().navigateToSurah(surahNum);
+                      },
+                    );
                   },
                 );
-              },
+              }
             ),
           ),
         ],

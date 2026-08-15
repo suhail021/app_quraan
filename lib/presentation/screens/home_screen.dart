@@ -8,14 +8,7 @@ import 'tafsir_download_screen.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  final Function(bool) onToggleTheme;
-  final bool isDarkMode;
-
-  const HomeScreen({
-    Key? key,
-    required this.onToggleTheme,
-    required this.isDarkMode,
-  }) : super(key: key);
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -56,10 +49,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSurahList() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary = isDark ? DesignTokens.darkTextPrimary : DesignTokens.lightTextPrimary;
-    final primaryAccent = isDark ? DesignTokens.darkPrimaryAccent : DesignTokens.lightPrimaryAccent;
-    final goldAccent = isDark ? DesignTokens.darkGoldAccent : DesignTokens.lightGoldAccent;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textPrimary = colorScheme.onSurface;
+    final primaryAccent = colorScheme.primary;
 
     return Column(
       children: [
@@ -67,14 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Container(
           padding: const EdgeInsets.only(top: 50, left: 20, right: 20, bottom: 24),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                primaryAccent.withOpacity(0.9),
-                primaryAccent,
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            color: primaryAccent,
             borderRadius: const BorderRadius.only(
               bottomLeft: Radius.circular(30),
               bottomRight: Radius.circular(30),
@@ -117,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: isDark ? DesignTokens.darkCard : Colors.white,
+                  color: colorScheme.surface,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
@@ -196,17 +181,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.search, color: goldAccent),
+                    Icon(Icons.search, color: primaryAccent),
                     IconButton(
-                      icon: Icon(Icons.settings_outlined, color: textPrimary.withOpacity(0.5)),
+                      icon: Icon(Icons.settings_outlined, color: primaryAccent.withValues(alpha: 0.5)),
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => SettingsScreen(
-                              onToggleTheme: widget.onToggleTheme,
-                              isDarkMode: widget.isDarkMode,
-                            ),
+                            builder: (context) => const SettingsScreen(),
                           ),
                         );
                       },
@@ -215,15 +197,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               filled: true,
-              fillColor: isDark ? DesignTokens.darkCard : DesignTokens.lightCard,
+              fillColor: colorScheme.surface,
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: isDark ? DesignTokens.darkBorder : DesignTokens.lightBorder),
+                borderSide: BorderSide(color: colorScheme.outline),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: isDark ? DesignTokens.darkBorder : DesignTokens.lightBorder),
+                borderSide: BorderSide(color: colorScheme.outline),
               ),
             ),
           ),
@@ -241,10 +223,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     return Card(
                       margin: const EdgeInsets.only(bottom: 8),
                       elevation: 0,
-                      color: isDark ? DesignTokens.darkCard.withOpacity(0.5) : Colors.white.withOpacity(0.5),
+                      color: colorScheme.surface.withOpacity(0.8),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
-                        side: BorderSide(color: isDark ? DesignTokens.darkBorder : DesignTokens.lightBorder.withOpacity(0.5)),
+                        side: BorderSide(color: colorScheme.outline.withOpacity(0.5)),
                       ),
                       child: ListTile(
                         onTap: () {
@@ -261,7 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(color: goldAccent.withOpacity(0.6)),
+                            border: Border.all(color: primaryAccent.withValues(alpha: 0.6)),
                           ),
                           child: Text(
                             '${surah.number}',
@@ -269,7 +251,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               fontFamily: DesignTokens.fontCairo,
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
-                              color: goldAccent,
+                              color: primaryAccent,
                             ),
                           ),
                         ),
@@ -290,7 +272,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: textPrimary.withOpacity(0.6),
                           ),
                         ),
-                        trailing: Icon(Icons.arrow_forward_ios_rounded, size: 14, color: textPrimary.withOpacity(0.3)),
+                        trailing: Icon(Icons.arrow_forward_ios_rounded, size: 14, color: primaryAccent.withValues(alpha: 0.3)),
                       ),
                     );
                   },
@@ -302,9 +284,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryAccent = isDark ? DesignTokens.darkPrimaryAccent : DesignTokens.lightPrimaryAccent;
-    final goldAccent = isDark ? DesignTokens.darkGoldAccent : DesignTokens.lightGoldAccent;
+    final colorScheme = Theme.of(context).colorScheme;
+    final primaryAccent = colorScheme.primary;
 
     final pages = [
       _buildSurahList(),
@@ -313,7 +294,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
 
     return Scaffold(
-      backgroundColor: isDark ? DesignTokens.darkBg : DesignTokens.lightBg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       // لا حاجة لـ AppBar هنا بعد الآن لأننا بنيناه بداخل الشاشة
       body: Column( 
         children: [
@@ -326,7 +307,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: (index) => setState(() => _currentIndex = index),
         type: BottomNavigationBarType.fixed,
         selectedItemColor: primaryAccent,
-        unselectedItemColor: isDark ? DesignTokens.darkTextSecondary : DesignTokens.lightTextSecondary,
+        unselectedItemColor: colorScheme.onSurfaceVariant,
         selectedLabelStyle: const TextStyle(fontFamily: DesignTokens.fontCairo, fontWeight: FontWeight.bold, fontSize: 11),
         unselectedLabelStyle: const TextStyle(fontFamily: DesignTokens.fontCairo, fontSize: 10),
         items: const [
