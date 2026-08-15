@@ -247,21 +247,19 @@ class _AyahTafsirBottomSheetState extends State<AyahTafsirBottomSheet> {
                                   margin: const EdgeInsets.symmetric(vertical: 12.0),
                                   padding: const EdgeInsets.all(16.0),
                                   decoration: BoxDecoration(
-                                    color: Theme.of(context).brightness == Brightness.dark 
-                                        ? const Color(0xFF1E293B) 
-                                        : const Color(0xFFF9F6EE),
+                                    color: colorScheme.primary.withValues(alpha: 0.05),
                                     borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3), width: 1.5),
+                                    border: Border.all(color: colorScheme.primary.withValues(alpha: 0.2), width: 1.0),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.05),
+                                        color: Colors.black.withValues(alpha: 0.03),
                                         blurRadius: 8,
                                         offset: const Offset(0, 4),
                                       ),
                                     ],
                                   ),
                                   child: Text(
-                                    ayah.ayah.trim(),
+                                    ayah.ayah.replaceAll('\n', ' ').replaceAll(RegExp(r'\s+'), ' ').trim(),
                                     style: TextStyle(
                                       fontSize: 24, 
                                       height: 1.8,
@@ -271,7 +269,7 @@ class _AyahTafsirBottomSheetState extends State<AyahTafsirBottomSheet> {
                                       fontFamily: 'hafs',
                                       package: 'flutter_quran',
                                     ),
-                                    textAlign: TextAlign.justify,
+                                    textAlign: TextAlign.center,
                                     textDirection: TextDirection.rtl,
                                   ),
                                 ),

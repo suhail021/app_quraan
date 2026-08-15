@@ -37,7 +37,7 @@ class _QuranPageTopInfoWidgetState extends State<QuranPageTopInfoWidget> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -53,7 +53,7 @@ class _QuranPageTopInfoWidgetState extends State<QuranPageTopInfoWidget> {
                       .hafsStyle
                       .copyWith(
                         color: Colors.black, 
-                        fontSize: 16,
+                        fontSize: 13,
                       ),
                 ),
               ),
@@ -70,7 +70,7 @@ class _QuranPageTopInfoWidgetState extends State<QuranPageTopInfoWidget> {
                         .hafsStyle
                         .copyWith(
                           color: Colors.black, 
-                          fontSize: 16,
+                          fontSize: 13,
                         )),
               ),
             ),

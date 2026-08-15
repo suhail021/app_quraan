@@ -81,19 +81,19 @@ class _SurahTafsirReaderScreenState extends State<SurahTafsirReaderScreen> {
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF9F6EE),
+                            color: primaryAccent.withValues(alpha: 0.05),
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: primaryAccent.withOpacity(0.3), width: 1.5),
+                            border: Border.all(color: primaryAccent.withValues(alpha: 0.2), width: 1.0),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
+                                color: Colors.black.withValues(alpha: 0.03),
                                 blurRadius: 8,
                                 offset: const Offset(0, 4),
                               ),
                             ],
                           ),
                           child: Text(
-                            ayahObj.ayah.trim(),
+                            ayahObj.ayah.replaceAll('\n', ' ').replaceAll(RegExp(r'\s+'), ' ').trim(),
                             style: TextStyle(
                               fontSize: 24, // Increased font size for better reading
                               height: 1.8,
@@ -101,7 +101,7 @@ class _SurahTafsirReaderScreenState extends State<SurahTafsirReaderScreen> {
                               fontFamily: 'hafs', // Quraan font
                               package: 'flutter_quran', // CRITICAL for correct decoration rendering
                             ),
-                            textAlign: TextAlign.justify,
+                            textAlign: TextAlign.center,
                             textDirection: TextDirection.rtl,
                           ),
                         ),
