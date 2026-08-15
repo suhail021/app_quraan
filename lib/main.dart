@@ -28,7 +28,7 @@ class QuranApp extends StatelessWidget {
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
           return MaterialApp(
-            title: 'سكينة — القرآن الكريم',
+            title: ' القرآن الكريم',
             debugShowCheckedModeBanner: false,
             themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
             theme: AppTheme.lightTheme,

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_quran/flutter_quran.dart';
 import '../../data/services/database_helper.dart';
-
+import '../../core/theme/design_tokens.dart';
+import '../screens/surah_tafsir_reader_screen.dart';
 class AyahTafsirBottomSheet extends StatefulWidget {
   final Ayah initialAyah;
 
@@ -120,42 +121,55 @@ class _AyahTafsirBottomSheetState extends State<AyahTafsirBottomSheet> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final ayah = _allAyahs![_currentIndex];
+    final isBookmarked = FlutterQuran().getAllBookmarks().isNotEmpty 
+        && FlutterQuran().getAllBookmarks().first.ayahId == ayah.id;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Container(
-        padding: const EdgeInsets.only(top: 12.0),
+        padding: const EdgeInsets.only(top: 12.0, bottom: 20.0),
         decoration: BoxDecoration(
           color: colorScheme.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.56,
+        ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             // Top Handle
             Container(
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.3),
+                color: Colors.grey.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
             const SizedBox(height: 16),
             
-            // PageView for swiping ayahs
-            Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: _allAyahs!.length,
-                onPageChanged: _onPageChanged,
-                itemBuilder: (context, index) {
-                  final ayah = _allAyahs![index];
-                  final isBookmarked = FlutterQuran().getAllBookmarks().isNotEmpty 
-                      && FlutterQuran().getAllBookmarks().first.ayahId == ayah.id;
-                      
-                  return Padding(
+            Flexible(
+              child: GestureDetector(
+                onHorizontalDragEnd: (details) {
+                  // RTL: drag right -> positive velocity (previous for LTR, next for RTL)
+                  if (details.primaryVelocity! > 300) {
+                    if (_currentIndex < _allAyahs!.length - 1) {
+                      _onPageChanged(_currentIndex + 1);
+                    }
+                  } else if (details.primaryVelocity! < -300) {
+                    if (_currentIndex > 0) {
+                      _onPageChanged(_currentIndex - 1);
+                    }
+                  }
+                },
+                child: SingleChildScrollView(
+                  child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         // Header: Title and Actions
                         Row(
@@ -174,8 +188,25 @@ class _AyahTafsirBottomSheetState extends State<AyahTafsirBottomSheet> {
                             Row(
                               children: [
                                 IconButton(
+                                  icon: const Icon(Icons.menu_book_rounded),
+                                  color: colorScheme.primary,
+                                  tooltip: 'تفسير السورة كاملة',
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    Navigator.push(
+                                      context, 
+                                      MaterialPageRoute(
+                                        builder: (_) => SurahTafsirReaderScreen(
+                                          surahNumber: ayah.surahNumber,
+                                          surah: FlutterQuran().getSurah(ayah.surahNumber),
+                                        )
+                                      )
+                                    );
+                                  },
+                                ),
+                                IconButton(
                                   icon: const Icon(Icons.copy_rounded),
-                                  color: Colors.grey.shade600,
+                                  color: colorScheme.onSurface.withValues(alpha: 0.6),
                                   tooltip: 'نسخ الآية',
                                   onPressed: () => _copyAyah(ayah),
                                 ),
@@ -190,56 +221,84 @@ class _AyahTafsirBottomSheetState extends State<AyahTafsirBottomSheet> {
                           ],
                         ),
                         
-                        // Ayah Text
-                        Container(
-                          margin: const EdgeInsets.symmetric(vertical: 12.0),
-                          padding: const EdgeInsets.all(12.0),
-                          decoration: BoxDecoration(
-                            color: colorScheme.primary.withOpacity(0.05), 
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3), width: 1.5),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.03),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          transitionBuilder: (Widget child, Animation<double> animation) {
+                            // Determine the slide direction based on the key
+                            // We use a simple fade+scale here for elegance
+                            return FadeTransition(
+                              opacity: animation,
+                              child: SlideTransition(
+                                position: Tween<Offset>(
+                                  begin: const Offset(0.05, 0.0),
+                                  end: Offset.zero,
+                                ).animate(animation),
+                                child: child,
                               ),
-                            ],
-                          ),
-                          child: Text(
-                            '${ayah.ayah.trim()} ﴿${ayah.ayahNumber}﴾',
-                            style: TextStyle(
-                              fontSize: 16, 
-                              height: 1.5,
-                              color: colorScheme.onSurface, 
-                              fontFamily: 'hafs',
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        
-                        // Tafsir
-                        Expanded(
-                          child: SingleChildScrollView(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 4.0),
-                              child: !_tafsirCache.containsKey(index)
-                                ? const Center(child: CircularProgressIndicator())
-                                : Text(
-                                    _tafsirCache[index] ?? '',
-                                    style: TextStyle(
-                                      fontSize: 18, 
-                                      color: colorScheme.onSurface, 
-                                      height: 1.5,
-                                    ),
+                            );
+                          },
+                          child: KeyedSubtree(
+                            key: ValueKey<int>(_currentIndex),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                // Ayah Text
+                                Container(
+                                  margin: const EdgeInsets.symmetric(vertical: 12.0),
+                                  padding: const EdgeInsets.all(16.0),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).brightness == Brightness.dark 
+                                        ? const Color(0xFF1E293B) 
+                                        : const Color(0xFFF9F6EE),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3), width: 1.5),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: 0.05),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
                                   ),
+                                  child: Text(
+                                    ayah.ayah.trim(),
+                                    style: TextStyle(
+                                      fontSize: 24, 
+                                      height: 1.8,
+                                      color: Theme.of(context).brightness == Brightness.dark 
+                                          ? Colors.white 
+                                          : const Color(0xFF1A1A1A),
+                                      fontFamily: 'hafs',
+                                      package: 'flutter_quran',
+                                    ),
+                                    textAlign: TextAlign.justify,
+                                    textDirection: TextDirection.rtl,
+                                  ),
+                                ),
+                                
+                                // Tafsir
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 4.0),
+                                  child: !_tafsirCache.containsKey(_currentIndex)
+                                    ? const Center(child: CircularProgressIndicator())
+                                    : Text(
+                                        _tafsirCache[_currentIndex] ?? '',
+                                        style: TextStyle(
+                                          fontSize: 18, 
+                                          color: colorScheme.onSurface, 
+                                          height: 1.6,
+                                          fontFamily: DesignTokens.fontCairo,
+                                        ),
+                                      ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
                       ],
                     ),
-                  );
-                },
+                  ),
+                ),
               ),
             ),
           ],
